@@ -41,20 +41,35 @@ public class OrderServiceImpl implements OrderService {
     private final CouponRepository couponRepository;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = {InsufficientStockException.class, SupplierInactiveException.class, Exception.class})
     public OrderResponseDTO checkout(User user, CheckoutRequest req) {
+        // a. Carregar cartItems
         List<CartItem> cartItems = cartItemRepository.findByUserId(user.getId());
         if (cartItems.isEmpty()) {
             throw new IllegalStateException("Carrinho vazio");
         }
 
+        // b. Validar fornecedor e estoque de TODOS os itens antes de salvar qualquer coisa
+        for (CartItem ci : cartItems) {
+            Product p = productRepository.findById(ci.getProduct().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado"));
+
+            if (p.getSupplier() == null || !Boolean.TRUE.equals(p.getSupplier().getActive())) {
+                throw new SupplierInactiveException("Fornecedor do produto está inativo: " + p.getId());
+            }
+
+            if (p.getStock() < ci.getQuantity()) {
+                throw new InsufficientStockException("Estoque insuficiente para o produto: " + p.getId());
+            }
+        }
+
+        // c. Calcular total (com desconto do cupom se houver)
         BigDecimal itemsTotal = cartItems.stream()
                 .map(ci -> ci.getProduct().getPrice().multiply(BigDecimal.valueOf(ci.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal shipping = calculateShipping(itemsTotal);
 
-        // Apply coupon discount if provided
         BigDecimal discount = BigDecimal.ZERO;
         if (req.getCouponCode() != null && !req.getCouponCode().isBlank()) {
             Coupon coupon = couponRepository.findByCode(req.getCouponCode())
@@ -74,6 +89,7 @@ public class OrderServiceImpl implements OrderService {
 
         BigDecimal total = itemsTotal.subtract(discount).add(shipping);
 
+        // d. Criar e salvar o Order
         Order order = Order.builder()
                 .user(user)
                 .status(OrderStatus.PENDING)
@@ -81,46 +97,29 @@ public class OrderServiceImpl implements OrderService {
                 .shippingCost(shipping)
                 .discount(discount)
                 .build();
-
-        // persist order first (items will be attached after)
         order = orderRepository.save(order);
 
-        // populate order items and attach
-        List<OrderItem> orderItems = cartItems.stream().map(ci -> {
-            return OrderItem.builder()
-                    .productId(ci.getProduct().getId())
-                    .productName(ci.getProduct().getName())
-                    .unitPrice(ci.getProduct().getPrice())
-                    .quantity(ci.getQuantity())
-                    .subtotal(ci.getProduct().getPrice().multiply(BigDecimal.valueOf(ci.getQuantity())))
-                    .build();
-        }).collect(Collectors.toList());
-
-        // attach order reference
-        for (OrderItem oi : orderItems) {
-            oi.setOrder(order);
-        }
+        // e. Criar e salvar os OrderItems
+        List<OrderItem> orderItems = cartItems.stream().map(ci -> OrderItem.builder()
+                .order(order)
+                .productId(ci.getProduct().getId())
+                .productName(ci.getProduct().getName())
+                .unitPrice(ci.getProduct().getPrice())
+                .quantity(ci.getQuantity())
+                .subtotal(ci.getProduct().getPrice().multiply(BigDecimal.valueOf(ci.getQuantity())))
+                .build()).collect(Collectors.toList());
         order.setItems(orderItems);
         orderRepository.save(order);
 
-        // debit stock and validate suppliers
+        // f. Debitar estoque de todos os produtos
         for (CartItem ci : cartItems) {
             Product p = productRepository.findById(ci.getProduct().getId())
                     .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado"));
-
-            if (p.getSupplier() == null || !Boolean.TRUE.equals(p.getSupplier().getActive())) {
-                throw new SupplierInactiveException("Fornecedor do produto está inativo: " + p.getId());
-            }
-
-            if (p.getStock() < ci.getQuantity()) {
-                throw new InsufficientStockException("Estoque insuficiente para o produto: " + p.getId());
-            }
-
             p.setStock(p.getStock() - ci.getQuantity());
             productRepository.save(p);
         }
 
-        // process payment (fake)
+        // g. Processar pagamento
         String txn = paymentService.processPayment(order.getTotal(), req.getPaymentMethod());
         boolean paid = txn != null && !txn.isBlank();
 
@@ -130,14 +129,14 @@ public class OrderServiceImpl implements OrderService {
             throw new IllegalStateException("Pagamento recusado");
         }
 
+        // h. Confirmar order status
         order.setStatus(OrderStatus.CONFIRMED);
         orderRepository.save(order);
 
-        // clear cart
+        // i. Limpar carrinho
         cartItemRepository.deleteByUserId(user.getId());
 
-        // build response
-        OrderResponseDTO resp = OrderResponseDTO.builder()
+        return OrderResponseDTO.builder()
                 .id(order.getId())
                 .status(order.getStatus().name())
                 .total(order.getTotal())
@@ -152,8 +151,6 @@ public class OrderServiceImpl implements OrderService {
                         .build()).collect(Collectors.toList()))
                 .createdAt(order.getCreatedAt())
                 .build();
-
-        return resp;
     }
 
     @Override
@@ -201,7 +198,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private BigDecimal calculateShipping(BigDecimal itemsTotal) {
-        // Simple fictitious frete: R$10 for orders under R$100, otherwise free
         if (itemsTotal.compareTo(BigDecimal.valueOf(100)) < 0) {
             return BigDecimal.valueOf(10);
         }
