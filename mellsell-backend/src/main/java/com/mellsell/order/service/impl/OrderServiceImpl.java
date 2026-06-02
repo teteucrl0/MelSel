@@ -3,8 +3,10 @@ package com.mellsell.order.service.impl;
 import com.mellsell.auth.entity.User;
 import com.mellsell.cart.entity.CartItem;
 import com.mellsell.cart.repository.CartItemRepository;
+import com.mellsell.catalog.entity.Coupon;
 import com.mellsell.catalog.entity.Product;
 import com.mellsell.catalog.exception.ResourceNotFoundException;
+import com.mellsell.catalog.repository.CouponRepository;
 import com.mellsell.catalog.repository.ProductRepository;
 import com.mellsell.order.dto.CheckoutRequest;
 import com.mellsell.order.dto.OrderResponseDTO;
@@ -22,6 +24,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,6 +38,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final PaymentService paymentService;
+    private final CouponRepository couponRepository;
 
     @Override
     @Transactional
@@ -48,13 +53,33 @@ public class OrderServiceImpl implements OrderService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal shipping = calculateShipping(itemsTotal);
-        BigDecimal total = itemsTotal.add(shipping);
+
+        // Apply coupon discount if provided
+        BigDecimal discount = BigDecimal.ZERO;
+        if (req.getCouponCode() != null && !req.getCouponCode().isBlank()) {
+            Coupon coupon = couponRepository.findByCode(req.getCouponCode())
+                    .orElseThrow(() -> new IllegalArgumentException("Cupom não encontrado: " + req.getCouponCode()));
+            LocalDateTime now = LocalDateTime.now();
+            if (!Boolean.TRUE.equals(coupon.getActive())
+                    || now.isBefore(coupon.getValidFrom())
+                    || now.isAfter(coupon.getValidUntil())
+                    || coupon.getUsedCount() >= coupon.getMaxUses()) {
+                throw new IllegalArgumentException("Cupom inválido ou expirado: " + req.getCouponCode());
+            }
+            discount = itemsTotal.multiply(BigDecimal.valueOf(coupon.getDiscountPercentage()))
+                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+            coupon.setUsedCount(coupon.getUsedCount() + 1);
+            couponRepository.save(coupon);
+        }
+
+        BigDecimal total = itemsTotal.subtract(discount).add(shipping);
 
         Order order = Order.builder()
                 .user(user)
                 .status(OrderStatus.PENDING)
                 .total(total)
                 .shippingCost(shipping)
+                .discount(discount)
                 .build();
 
         // persist order first (items will be attached after)
@@ -117,6 +142,7 @@ public class OrderServiceImpl implements OrderService {
                 .status(order.getStatus().name())
                 .total(order.getTotal())
                 .shippingCost(order.getShippingCost())
+                .discount(order.getDiscount())
                 .items(order.getItems().stream().map(oi -> OrderResponseDTO.OrderItemDTO.builder()
                         .productId(oi.getProductId())
                         .productName(oi.getProductName())
@@ -138,6 +164,7 @@ public class OrderServiceImpl implements OrderService {
                 .status(order.getStatus().name())
                 .total(order.getTotal())
                 .shippingCost(order.getShippingCost())
+                .discount(order.getDiscount())
                 .items(order.getItems().stream().map(oi -> OrderResponseDTO.OrderItemDTO.builder()
                         .productId(oi.getProductId())
                         .productName(oi.getProductName())
@@ -161,6 +188,7 @@ public class OrderServiceImpl implements OrderService {
                 .status(order.getStatus().name())
                 .total(order.getTotal())
                 .shippingCost(order.getShippingCost())
+                .discount(order.getDiscount())
                 .items(order.getItems().stream().map(oi -> OrderResponseDTO.OrderItemDTO.builder()
                         .productId(oi.getProductId())
                         .productName(oi.getProductName())
