@@ -15,4 +15,6 @@ public class CheckoutRequest {
 
     @NotBlank
     private String paymentMethod;
+
+    private String couponCode;
 }
