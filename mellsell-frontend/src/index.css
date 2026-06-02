@@ -1,10 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  color-scheme: light;
   font-family: Lato, system-ui, -apple-system, sans-serif;
-  background: #FAF6F0;
-  color: #3D2914;
 }
 
 * {
@@ -24,14 +21,12 @@ body,
 body {
   margin: 0;
   min-width: 320px;
-  background: #FAF6F0;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
 
 ::selection {
   background: rgba(212, 160, 23, 0.3);
-  color: #3D2914;
 }
 
 a {

@@ -13,6 +13,9 @@ import VendorProducts from '../pages/VendorProducts'
 import SupplierDashboard from '../pages/SupplierDashboard'
 import AdminProductPanel from '../pages/AdminProductPanel'
 import AdminDashboard from '../pages/AdminDashboard'
+import AdminUsers from '../pages/AdminUsers'
+import AdminSuppliers from '../pages/AdminSuppliers'
+import AdminSettings from '../pages/AdminSettings'
 import VendorCoupons from '../pages/VendorCoupons'
 import VendorPromotions from '../pages/VendorPromotions'
 import PrivateRoute from '../components/PrivateRoute'
@@ -20,7 +23,7 @@ import PrivateRoute from '../components/PrivateRoute'
 export default function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-slate-950 text-slate-100">
+      <div className="min-h-screen bg-white text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
         <Header />
         <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
           <Routes>
@@ -39,6 +42,9 @@ export default function App() {
             <Route path="/admin/products" element={<PrivateRoute allowedRoles={["ADMIN"]}><AdminProductPanel /></PrivateRoute>} />
             <Route path="/admin/reviews" element={<PrivateRoute allowedRoles={["ADMIN"]}><AdminReviews /></PrivateRoute>} />
             <Route path="/admin/reports" element={<PrivateRoute allowedRoles={["ADMIN"]}><AdminReports /></PrivateRoute>} />
+            <Route path="/admin/users" element={<PrivateRoute allowedRoles={["ADMIN"]}><AdminUsers /></PrivateRoute>} />
+            <Route path="/admin/suppliers" element={<PrivateRoute allowedRoles={["ADMIN"]}><AdminSuppliers /></PrivateRoute>} />
+            <Route path="/admin/settings" element={<PrivateRoute allowedRoles={["ADMIN"]}><AdminSettings /></PrivateRoute>} />
           </Routes>
         </main>
       </div>
