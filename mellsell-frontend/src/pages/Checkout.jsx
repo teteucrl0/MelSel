@@ -5,11 +5,12 @@ import cartService from '../services/cartService'
 export default function Checkout() {
   const [address, setAddress] = useState('')
   const [payment, setPayment] = useState('FAKE')
+  const [couponCode, setCouponCode] = useState('')
   const navigate = useNavigate()
 
   const submit = (e) => {
     e.preventDefault()
-    cartService.checkout(address, payment).then(() => {
+    cartService.checkout(address, payment, couponCode).then(() => {
       alert('Pedido confirmado')
       navigate('/'
     )}).catch(() => alert('Falha no checkout'))
@@ -23,6 +24,7 @@ export default function Checkout() {
         <select value={payment} onChange={e => setPayment(e.target.value)} className="w-full border p-2">
           <option value="FAKE">Pagamento Simulado</option>
         </select>
+        <input className="w-full border p-2" placeholder="Cupom de desconto (opcional)" value={couponCode} onChange={e => setCouponCode(e.target.value)} />
         <button className="bg-yellow-500 text-white px-4 py-2 rounded">Pagar</button>
       </form>
     </div>
