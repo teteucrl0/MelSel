@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Enable class-based dark mode for Tailwind 4 */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   font-family: Lato, system-ui, -apple-system, sans-serif;
 }
