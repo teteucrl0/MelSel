@@ -14,6 +14,7 @@ import SupplierDashboard from '../pages/SupplierDashboard'
 import AdminProductPanel from '../pages/AdminProductPanel'
 import AdminDashboard from '../pages/AdminDashboard'
 import VendorCoupons from '../pages/VendorCoupons'
+import VendorPromotions from '../pages/VendorPromotions'
 import PrivateRoute from '../components/PrivateRoute'
 
 export default function App() {
@@ -33,6 +34,7 @@ export default function App() {
             <Route path="/vendor/products" element={<PrivateRoute allowedRoles={["VENDEDOR"]}><VendorProducts /></PrivateRoute>} />
             <Route path="/vendor/dashboard" element={<PrivateRoute allowedRoles={["VENDEDOR"]}><SupplierDashboard /></PrivateRoute>} />
             <Route path="/vendor/coupons" element={<PrivateRoute allowedRoles={["VENDEDOR"]}><VendorCoupons /></PrivateRoute>} />
+            <Route path="/vendor/promotions" element={<PrivateRoute allowedRoles={["VENDEDOR"]}><VendorPromotions /></PrivateRoute>} />
             <Route path="/admin/dashboard" element={<PrivateRoute allowedRoles={["ADMIN"]}><AdminDashboard /></PrivateRoute>} />
             <Route path="/admin/products" element={<PrivateRoute allowedRoles={["ADMIN"]}><AdminProductPanel /></PrivateRoute>} />
             <Route path="/admin/reviews" element={<PrivateRoute allowedRoles={["ADMIN"]}><AdminReviews /></PrivateRoute>} />
