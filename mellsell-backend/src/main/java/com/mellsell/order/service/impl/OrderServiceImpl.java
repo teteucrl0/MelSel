@@ -96,6 +96,7 @@ public class OrderServiceImpl implements OrderService {
                 .total(total)
                 .shippingCost(shipping)
                 .discount(discount)
+                .shippingAddress(req.getShippingAddress())
                 .build();
         order = orderRepository.save(order);
 
@@ -142,6 +143,7 @@ public class OrderServiceImpl implements OrderService {
                 .total(order.getTotal())
                 .shippingCost(order.getShippingCost())
                 .discount(order.getDiscount())
+                .shippingAddress(order.getShippingAddress())
                 .items(order.getItems().stream().map(oi -> OrderResponseDTO.OrderItemDTO.builder()
                         .productId(oi.getProductId())
                         .productName(oi.getProductName())
@@ -162,6 +164,7 @@ public class OrderServiceImpl implements OrderService {
                 .total(order.getTotal())
                 .shippingCost(order.getShippingCost())
                 .discount(order.getDiscount())
+                .shippingAddress(order.getShippingAddress())
                 .items(order.getItems().stream().map(oi -> OrderResponseDTO.OrderItemDTO.builder()
                         .productId(oi.getProductId())
                         .productName(oi.getProductName())
@@ -186,6 +189,7 @@ public class OrderServiceImpl implements OrderService {
                 .total(order.getTotal())
                 .shippingCost(order.getShippingCost())
                 .discount(order.getDiscount())
+                .shippingAddress(order.getShippingAddress())
                 .items(order.getItems().stream().map(oi -> OrderResponseDTO.OrderItemDTO.builder()
                         .productId(oi.getProductId())
                         .productName(oi.getProductName())
