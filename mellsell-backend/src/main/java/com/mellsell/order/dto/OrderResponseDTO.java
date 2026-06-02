@@ -16,6 +16,7 @@ public class OrderResponseDTO {
     private String status;
     private BigDecimal total;
     private BigDecimal shippingCost;
+    private BigDecimal discount;
     private List<OrderItemDTO> items;
     private LocalDateTime createdAt;
 
