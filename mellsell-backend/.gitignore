@@ -4,3 +4,4 @@ target/
 *.pid
 *.pdf
 .env
+application-secret.properties
