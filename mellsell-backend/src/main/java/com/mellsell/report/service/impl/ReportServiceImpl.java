@@ -8,7 +8,6 @@ import com.mellsell.report.service.ReportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -23,13 +22,10 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public List<SalesReportItemDTO> salesReport(LocalDate from, LocalDate to) {
-        LocalDateTime fromDt = (from == null) ? LocalDateTime.MIN : from.atStartOfDay();
-        LocalDateTime toDt = (to == null) ? LocalDateTime.MAX : to.atTime(LocalTime.MAX);
+        LocalDateTime fromDt = (from == null) ? null : from.atStartOfDay();
+        LocalDateTime toDt = (to == null) ? null : to.atTime(LocalTime.MAX);
 
-        List<Order> orders = orderRepository.findAll().stream()
-                .filter(o -> o.getCreatedAt() != null && !o.getCreatedAt().isBefore(fromDt) && !o.getCreatedAt().isAfter(toDt))
-                .filter(o -> o.getStatus() != null && o.getStatus().name().equals("CONFIRMED"))
-                .collect(Collectors.toList());
+        List<Order> orders = orderRepository.findConfirmedBetween(fromDt, toDt);
 
         Map<Long, SalesReportItemDTO> map = new HashMap<>();
 
