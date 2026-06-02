@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import authService from '../services/authService'
 
 export default function Login() {
@@ -7,13 +7,14 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const navigate = useNavigate()
+  const location = useLocation()
+  const from = location.state?.from?.pathname || '/'
 
   const submit = async (e) => {
     e.preventDefault()
     try {
       await authService.login(email, password)
-      navigate('/')
-      window.location.reload()
+      navigate(from, { replace: true })
     } catch (err) {
       console.error(err)
       setError('Falha no login')
