@@ -20,16 +20,16 @@ export default function Orders() {
     }
   }
 
-  if (loading) return <div className="text-center py-8 text-slate-300">Carregando pedidos...</div>
+  if (loading) return <div className="text-center py-8 text-slate-600 dark:text-slate-300">Carregando pedidos...</div>
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-slate-100">Meus Pedidos</h1>
+      <h1 className="text-3xl font-bold mb-6 text-slate-900 dark:text-slate-100">Meus Pedidos</h1>
       
       {orders.length === 0 ? (
-        <div className="text-center py-12 bg-slate-800 rounded-lg">
-          <div className="text-2xl font-semibold text-slate-300 mb-4">📦 Nenhum pedido</div>
-          <p className="text-slate-400 mb-6">Você ainda não fez nenhuma compra</p>
+        <div className="text-center py-12 bg-white border border-slate-200 dark:border-none dark:bg-slate-800 rounded-lg">
+          <div className="text-2xl font-semibold text-slate-700 dark:text-slate-300 mb-4">📦 Nenhum pedido</div>
+          <p className="text-slate-500 dark:text-slate-400 mb-6">Você ainda não fez nenhuma compra</p>
           <Link to="/" className="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded font-bold">
             Começar compras
           </Link>
@@ -37,24 +37,24 @@ export default function Orders() {
       ) : (
         <div className="space-y-4">
           {orders.map(order => (
-            <div key={order.id} className="bg-slate-800 p-6 rounded-lg">
+            <div key={order.id} className="bg-white border border-slate-200 dark:border-none dark:bg-slate-800 p-6 rounded-lg shadow-sm">
               <div className="grid md:grid-cols-4 gap-4 mb-4">
                 <div>
-                  <div className="text-sm text-slate-400">Pedido #</div>
-                  <div className="font-bold text-lg text-slate-100">{order.id}</div>
+                  <div className="text-sm text-slate-500 dark:text-slate-400">Pedido #</div>
+                  <div className="font-bold text-lg text-slate-900 dark:text-slate-100">{order.id}</div>
                 </div>
                 <div>
-                  <div className="text-sm text-slate-400">Data</div>
-                  <div className="font-semibold text-slate-100">
+                  <div className="text-sm text-slate-500 dark:text-slate-400">Data</div>
+                  <div className="font-semibold text-slate-800 dark:text-slate-100">
                     {new Date(order.createdAt).toLocaleDateString('pt-BR')}
                   </div>
                 </div>
                 <div>
-                  <div className="text-sm text-slate-400">Total</div>
-                  <div className="font-bold text-yellow-400">R$ {parseFloat(order.total).toFixed(2)}</div>
+                  <div className="text-sm text-slate-500 dark:text-slate-400">Total</div>
+                  <div className="font-bold text-amber-600 dark:text-yellow-400">R$ {parseFloat(order.total).toFixed(2)}</div>
                 </div>
                 <div>
-                  <div className="text-sm text-slate-400">Status</div>
+                  <div className="text-sm text-slate-500 dark:text-slate-400">Status</div>
                   <div className={`font-semibold px-3 py-1 rounded text-white inline-block text-sm ${
                     order.status === 'completed' || order.status === 'COMPLETED' ? 'bg-green-600' :
                     order.status === 'pending' || order.status === 'PENDING' ? 'bg-yellow-600' :
@@ -68,13 +68,13 @@ export default function Orders() {
               </div>
               
               {order.items && order.items.length > 0 && (
-                <div className="border-t border-slate-700 pt-4">
-                  <div className="text-sm font-semibold text-slate-300 mb-2">Itens:</div>
+                <div className="border-t border-slate-100 dark:border-slate-700 pt-4">
+                  <div className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Itens:</div>
                   <div className="space-y-2">
                     {order.items.map((item, idx) => (
-                      <div key={idx} className="flex justify-between text-sm text-slate-300">
+                      <div key={idx} className="flex justify-between text-sm text-slate-600 dark:text-slate-300">
                         <span>{item.productName} x {item.quantity}</span>
-                        <span className="text-yellow-400">R$ {parseFloat(item.subtotal).toFixed(2)}</span>
+                        <span className="text-amber-600 dark:text-yellow-400 font-medium">R$ {parseFloat(item.subtotal).toFixed(2)}</span>
                       </div>
                     ))}
                   </div>

@@ -53,31 +53,31 @@ export default function AdminReports() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <h2 className="text-xl font-bold mb-4">Relatórios - Admin</h2>
+      <h2 className="text-xl font-bold mb-4 text-slate-900 dark:text-slate-100">Relatórios - Admin</h2>
       <div className="space-x-2 mb-4">
         <button onClick={loadJson} className="bg-yellow-500 text-white px-3 py-1 rounded">Carregar JSON</button>
-        <button onClick={downloadPdf} className="bg-gray-800 text-white px-3 py-1 rounded">Baixar PDF</button>
+        <button onClick={downloadPdf} className="bg-gray-800 text-white px-3 py-1 rounded dark:bg-slate-700">Baixar PDF</button>
         <div className="inline-block ml-2">
-          <label className="mr-2">Exportar usuários por papel:</label>
+          <label className="mr-2 text-slate-800 dark:text-slate-300">Exportar usuários por papel:</label>
           <button onClick={() => exportUsersByRole('CLIENTE')} className="bg-blue-600 text-white px-2 py-1 rounded mr-1">Cliente</button>
           <button onClick={() => exportUsersByRole('VENDEDOR')} className="bg-blue-600 text-white px-2 py-1 rounded mr-1">Vendedor</button>
           <button onClick={() => exportUsersByRole('ADMIN')} className="bg-blue-600 text-white px-2 py-1 rounded">Admin</button>
         </div>
       </div>
-      {loading && <div>Carregando...</div>}
+      {loading && <div className="text-slate-700 dark:text-slate-300">Carregando...</div>}
       {items && (
-        <table className="w-full border-collapse">
+        <table className="w-full border-collapse text-slate-900 dark:text-slate-300">
           <thead>
             <tr className="text-left">
-              <th>Produto</th><th>Quantidade</th><th>Total</th>
+              <th className="pb-2">Produto</th><th className="pb-2">Quantidade</th><th className="pb-2">Total</th>
             </tr>
           </thead>
           <tbody>
             {items.map(it => (
-              <tr key={it.productId} className="border-t">
-                <td>{it.productName}</td>
-                <td>{it.quantity}</td>
-                <td>R$ {it.total}</td>
+              <tr key={it.productId} className="border-t dark:border-slate-800">
+                <td className="py-2">{it.productName}</td>
+                <td className="py-2">{it.quantity}</td>
+                <td className="py-2">R$ {it.total}</td>
               </tr>
             ))}
           </tbody>

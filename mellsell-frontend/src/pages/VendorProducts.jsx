@@ -44,25 +44,58 @@ export default function VendorProducts() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <h2 className="text-xl font-bold mb-4">Gerenciar Produtos (Vendedor)</h2>
-      {loadingSupplier && <p className="mb-3 text-sm text-gray-500">Carregando fornecedor...</p>}
-      <form onSubmit={submit} className="space-y-2 mb-4 border p-3 rounded">
-        <input className="w-full border p-2" placeholder="Nome" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
-        <textarea className="w-full border p-2" placeholder="Descrição" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
-        <input className="w-full border p-2" placeholder="Preço" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} />
-        <input className="w-full border p-2" placeholder="Estoque" type="number" value={form.stock} onChange={e => setForm({ ...form, stock: e.target.value })} />
-        <button className="bg-yellow-500 text-white px-3 py-1 rounded" disabled={!supplierId}>Criar</button>
+      <h2 className="text-2xl font-bold text-amber-900 dark:text-slate-100 mb-4">Gerenciar Produtos (Vendedor)</h2>
+      {loadingSupplier && <p className="mb-3 text-sm text-amber-700 dark:text-slate-400">Carregando fornecedor...</p>}
+      <form onSubmit={submit} className="space-y-3 mb-6 border-2 border-amber-200 dark:border-slate-800 p-4 rounded-lg bg-white dark:bg-slate-950 shadow-sm">
+        <input 
+          className="w-full border-2 border-amber-100 dark:border-slate-700 p-2 rounded bg-amber-50/30 dark:bg-slate-800 text-amber-900 dark:text-slate-100 focus:border-amber-500 dark:focus:border-amber-500 outline-none transition-colors" 
+          placeholder="Nome" 
+          value={form.name} 
+          onChange={e => setForm({ ...form, name: e.target.value })} 
+        />
+        <textarea 
+          className="w-full border-2 border-amber-100 dark:border-slate-700 p-2 rounded bg-amber-50/30 dark:bg-slate-800 text-amber-900 dark:text-slate-100 focus:border-amber-500 dark:focus:border-amber-500 outline-none transition-colors" 
+          placeholder="Descrição" 
+          value={form.description} 
+          onChange={e => setForm({ ...form, description: e.target.value })} 
+        />
+        <div className="grid grid-cols-2 gap-3">
+          <input 
+            className="border-2 border-amber-100 dark:border-slate-700 p-2 rounded bg-amber-50/30 dark:bg-slate-800 text-amber-900 dark:text-slate-100 focus:border-amber-500 dark:focus:border-amber-500 outline-none transition-colors" 
+            placeholder="Preço" 
+            value={form.price} 
+            onChange={e => setForm({ ...form, price: e.target.value })} 
+          />
+          <input 
+            className="border-2 border-amber-100 dark:border-slate-700 p-2 rounded bg-amber-50/30 dark:bg-slate-800 text-amber-900 dark:text-slate-100 focus:border-amber-500 dark:focus:border-amber-500 outline-none transition-colors" 
+            placeholder="Estoque" 
+            type="number" 
+            value={form.stock} 
+            onChange={e => setForm({ ...form, stock: e.target.value })} 
+          />
+        </div>
+        <button 
+          className="w-full bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700 text-white font-bold py-2 rounded-lg transition-colors disabled:opacity-50" 
+          disabled={!supplierId}
+        >
+          Criar Produto
+        </button>
       </form>
 
-      <ul className="space-y-2">
+      <ul className="space-y-3">
         {products.map(p => (
-          <li key={p.id} className="border p-3 rounded flex justify-between items-center">
+          <li key={p.id} className="border-2 border-amber-100 dark:border-slate-800 p-4 rounded-lg flex justify-between items-center bg-white dark:bg-slate-950 hover:border-amber-200 dark:hover:border-slate-700 transition-all shadow-sm">
             <div>
-              <div className="font-semibold">{p.name} - R$ {p.price}</div>
-              <div className="text-sm text-gray-500">Estoque: {p.stock}</div>
+              <div className="font-semibold text-amber-900 dark:text-slate-100">{p.name} - R$ {p.price}</div>
+              <div className="text-sm text-amber-700 dark:text-slate-400">Estoque: {p.stock}</div>
             </div>
             <div className="space-x-2">
-              <button onClick={() => del(p.id)} className="text-red-600">Deletar</button>
+              <button 
+                onClick={() => del(p.id)} 
+                className="text-red-600 dark:text-red-400 hover:underline font-medium"
+              >
+                Deletar
+              </button>
             </div>
           </li>
         ))}

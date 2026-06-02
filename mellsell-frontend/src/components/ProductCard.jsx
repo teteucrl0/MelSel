@@ -20,7 +20,7 @@ export default function ProductCard({ product, onAdd, loading = false }) {
   const outOfStock = stock <= 0
 
   return (
-    <article className="flex h-full flex-col overflow-hidden rounded-lg border-2 border-amber-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-md transition hover:-translate-y-1 hover:shadow-lg">
+    <article className="flex h-full flex-col overflow-hidden rounded-lg border-2 border-amber-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-md transition hover:-translate-y-1 hover:shadow-lg">
       <div className="flex items-start justify-between gap-4 border-b-2 border-amber-100 dark:border-slate-800 bg-amber-50 dark:bg-slate-800/50 p-4">
         <div className="space-y-2">
           <span

@@ -123,23 +123,23 @@ export default function AdminProductPanel() {
     setForm({ name: '', description: '', price: '', stock: 0, lowStockThreshold: 1, supplierId: '' })
   }
 
-  if (loading) return <div className="max-w-6xl mx-auto p-4"><p>Carregando...</p></div>
+  if (loading) return <div className="max-w-6xl mx-auto p-4"><p className="text-slate-900 dark:text-slate-300">Carregando...</p></div>
 
   return (
     <div className="max-w-6xl mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6">Painel de Gerenciamento de Produtos</h1>
+      <h1 className="text-3xl font-bold mb-6 text-slate-900 dark:text-slate-100">Painel de Gerenciamento de Produtos</h1>
 
       {/* Filter Bar */}
-      <div className="bg-gray-100 p-4 rounded mb-6 space-y-3">
+      <div className="bg-gray-100 p-4 rounded mb-6 space-y-3 dark:bg-slate-900">
         <div className="grid grid-cols-3 gap-3">
           <input
-            className="border p-2 rounded"
+            className="border p-2 rounded dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
             placeholder="Buscar por nome ou descrição"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
           />
           <select
-            className="border p-2 rounded"
+            className="border p-2 rounded dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             value={filterSupplier}
             onChange={e => setFilterSupplier(e.target.value)}
           >
@@ -152,7 +152,7 @@ export default function AdminProductPanel() {
             <button onClick={handleSearch} className="bg-blue-600 text-white px-4 py-2 rounded flex-1">
               Buscar
             </button>
-            <button onClick={handleReset} className="bg-gray-400 text-white px-4 py-2 rounded flex-1">
+            <button onClick={handleReset} className="bg-gray-400 text-white px-4 py-2 rounded flex-1 dark:bg-slate-600">
               Limpar
             </button>
           </div>
@@ -166,18 +166,18 @@ export default function AdminProductPanel() {
             + Criar Novo Produto
           </button>
         ) : (
-          <form onSubmit={submit} className="border p-4 rounded space-y-3 bg-yellow-50">
-            <h3 className="font-bold text-lg">{editingId ? 'Editar' : 'Criar'} Produto</h3>
+          <form onSubmit={submit} className="border p-4 rounded space-y-3 bg-yellow-50 dark:bg-slate-900 dark:border-slate-800">
+            <h3 className="font-bold text-lg text-slate-900 dark:text-slate-100">{editingId ? 'Editar' : 'Criar'} Produto</h3>
             <div className="grid grid-cols-2 gap-3">
               <input
-                className="border p-2 rounded"
+                className="border p-2 rounded dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
                 placeholder="Nome do Produto"
                 value={form.name}
                 onChange={e => setForm({ ...form, name: e.target.value })}
                 required
               />
               <select
-                className="border p-2 rounded"
+                className="border p-2 rounded dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                 value={form.supplierId}
                 onChange={e => setForm({ ...form, supplierId: e.target.value })}
                 required
@@ -190,7 +190,7 @@ export default function AdminProductPanel() {
               </select>
             </div>
             <textarea
-              className="w-full border p-2 rounded"
+              className="w-full border p-2 rounded dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
               placeholder="Descrição"
               value={form.description}
               onChange={e => setForm({ ...form, description: e.target.value })}
@@ -198,7 +198,7 @@ export default function AdminProductPanel() {
             />
             <div className="grid grid-cols-4 gap-3">
               <input
-                className="border p-2 rounded"
+                className="border p-2 rounded dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
                 placeholder="Preço"
                 type="number"
                 step="0.01"
@@ -207,7 +207,7 @@ export default function AdminProductPanel() {
                 required
               />
               <input
-                className="border p-2 rounded"
+                className="border p-2 rounded dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
                 placeholder="Estoque"
                 type="number"
                 value={form.stock}
@@ -215,7 +215,7 @@ export default function AdminProductPanel() {
                 required
               />
               <input
-                className="border p-2 rounded"
+                className="border p-2 rounded dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
                 placeholder="Limite Baixo"
                 type="number"
                 value={form.lowStockThreshold}
@@ -227,7 +227,7 @@ export default function AdminProductPanel() {
               <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded font-bold flex-1">
                 {editingId ? 'Atualizar' : 'Criar'}
               </button>
-              <button type="button" onClick={cancel} className="bg-gray-400 text-white px-4 py-2 rounded flex-1">
+              <button type="button" onClick={cancel} className="bg-gray-400 text-white px-4 py-2 rounded flex-1 dark:bg-slate-600">
                 Cancelar
               </button>
             </div>
@@ -237,42 +237,42 @@ export default function AdminProductPanel() {
 
       {/* Products Table */}
       <div>
-        <h2 className="text-2xl font-bold mb-3">Produtos ({products.length})</h2>
+        <h2 className="text-2xl font-bold mb-3 text-slate-900 dark:text-slate-100">Produtos ({products.length})</h2>
         {products.length === 0 ? (
-          <p className="text-gray-500">Nenhum produto encontrado</p>
+          <p className="text-gray-500 dark:text-slate-500">Nenhum produto encontrado</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="bg-gray-200">
-                  <th className="border p-2 text-left">Nome</th>
-                  <th className="border p-2 text-left">Fornecedor</th>
-                  <th className="border p-2 text-right">Preço</th>
-                  <th className="border p-2 text-right">Estoque</th>
-                  <th className="border p-2">Status</th>
-                  <th className="border p-2">Ações</th>
+                <tr className="bg-gray-200 dark:bg-slate-800 text-slate-900 dark:text-slate-100">
+                  <th className="border p-2 text-left dark:border-slate-700">Nome</th>
+                  <th className="border p-2 text-left dark:border-slate-700">Fornecedor</th>
+                  <th className="border p-2 text-right dark:border-slate-700">Preço</th>
+                  <th className="border p-2 text-right dark:border-slate-700">Estoque</th>
+                  <th className="border p-2 dark:border-slate-700">Status</th>
+                  <th className="border p-2 dark:border-slate-700">Ações</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="text-slate-800 dark:text-slate-300">
                 {products.map(p => (
-                  <tr key={p.id} className="hover:bg-gray-50">
-                    <td className="border p-2">
+                  <tr key={p.id} className="hover:bg-gray-50 dark:hover:bg-slate-800/50">
+                    <td className="border p-2 dark:border-slate-700">
                       <div className="font-semibold">{p.name}</div>
-                      {p.description && <div className="text-sm text-gray-600">{p.description.substring(0, 50)}...</div>}
+                      {p.description && <div className="text-sm text-gray-600 dark:text-slate-400">{p.description.substring(0, 50)}...</div>}
                     </td>
-                    <td className="border p-2">{p.supplier?.name || 'N/A'}</td>
-                    <td className="border p-2 text-right">R$ {parseFloat(p.price).toFixed(2)}</td>
-                    <td className="border p-2 text-right">
-                      <span className={p.stock < p.lowStockThreshold ? 'text-red-600 font-bold' : ''}>
+                    <td className="border p-2 dark:border-slate-700">{p.supplier?.name || 'N/A'}</td>
+                    <td className="border p-2 text-right dark:border-slate-700">R$ {parseFloat(p.price).toFixed(2)}</td>
+                    <td className="border p-2 text-right dark:border-slate-700">
+                      <span className={p.stock < p.lowStockThreshold ? 'text-red-600 font-bold dark:text-red-400' : ''}>
                         {p.stock}
                       </span>
                     </td>
-                    <td className="border p-2 text-center">
-                      <span className={`px-2 py-1 rounded text-xs font-bold ${p.active ? 'bg-green-200' : 'bg-red-200'}`}>
+                    <td className="border p-2 text-center dark:border-slate-700">
+                      <span className={`px-2 py-1 rounded text-xs font-bold ${p.active ? 'bg-green-200 text-green-800 dark:bg-green-900/50 dark:text-green-300' : 'bg-red-200 text-red-800 dark:bg-red-900/50 dark:text-red-300'}`}>
                         {p.active ? 'Ativo' : 'Inativo'}
                       </span>
                     </td>
-                    <td className="border p-2">
+                    <td className="border p-2 dark:border-slate-700">
                       <div className="flex gap-1 flex-wrap">
                         <button onClick={() => edit(p)} className="bg-blue-500 text-white px-2 py-1 rounded text-xs">
                           Editar

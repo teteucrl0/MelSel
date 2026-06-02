@@ -17,14 +17,14 @@ export default function AdminReviews() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <h2 className="text-xl font-bold mb-4">Moderação de Avaliações (Admin)</h2>
-      {loading && <div>Carregando...</div>}
+      <h2 className="text-xl font-bold mb-4 text-slate-900 dark:text-slate-100">Moderação de Avaliações (Admin)</h2>
+      {loading && <div className="text-slate-700 dark:text-slate-300">Carregando...</div>}
       <ul className="space-y-3">
         {pending.map(r => (
-          <li key={r.id} className="border p-3 rounded">
-            <div className="font-semibold">{r.userName} - {r.rating}★</div>
-            <div className="text-sm text-gray-700">{r.comment}</div>
-            <div className="text-xs text-gray-500">Produto: {r.productName} — {r.createdAt}</div>
+          <li key={r.id} className="border p-3 rounded dark:border-slate-800 dark:bg-slate-900">
+            <div className="font-semibold text-slate-900 dark:text-slate-100">{r.userName} - {r.rating}★</div>
+            <div className="text-sm text-gray-700 dark:text-slate-300">{r.comment}</div>
+            <div className="text-xs text-gray-500 dark:text-slate-500">Produto: {r.productName} — {r.createdAt}</div>
             <div className="mt-2 space-x-2">
               <button onClick={() => approve(r.id)} className="bg-green-600 text-white px-2 py-1 rounded">Aprovar</button>
               <button onClick={() => reject(r.id)} className="bg-red-600 text-white px-2 py-1 rounded">Rejeitar</button>
@@ -32,7 +32,7 @@ export default function AdminReviews() {
           </li>
         ))}
       </ul>
-      {pending.length === 0 && !loading && <div>Nenhuma avaliação pendente.</div>}
+      {pending.length === 0 && !loading && <div className="text-slate-700 dark:text-slate-400">Nenhuma avaliação pendente.</div>}
     </div>
   )
 }

@@ -108,21 +108,21 @@ export default function SupplierDashboard() {
     setForm({ name: '', description: '', price: '', stock: 0, lowStockThreshold: 1 })
   }
 
-  if (loading) return <div className="max-w-5xl mx-auto p-4"><p>Carregando...</p></div>
+  if (loading) return <div className="max-w-5xl mx-auto p-4"><p className="text-slate-900 dark:text-slate-300">Carregando...</p></div>
 
   return (
     <div className="max-w-5xl mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6">Dashboard do Fornecedor</h1>
+      <h1 className="text-3xl font-bold mb-6 text-slate-900 dark:text-slate-100">Dashboard do Fornecedor</h1>
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="bg-blue-50 p-4 rounded border border-blue-200">
-          <div className="text-sm text-gray-600">Receita Total</div>
-          <div className="text-2xl font-bold">R$ {parseFloat(sales.totalRevenue).toFixed(2)}</div>
+        <div className="bg-blue-50 p-4 rounded border border-blue-200 dark:bg-blue-950/20 dark:border-blue-900">
+          <div className="text-sm text-gray-600 dark:text-slate-400">Receita Total</div>
+          <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">R$ {parseFloat(sales.totalRevenue).toFixed(2)}</div>
         </div>
-        <div className="bg-green-50 p-4 rounded border border-green-200">
-          <div className="text-sm text-gray-600">Pedidos</div>
-          <div className="text-2xl font-bold">{sales.totalOrders}</div>
+        <div className="bg-green-50 p-4 rounded border border-green-200 dark:bg-green-950/20 dark:border-green-900">
+          <div className="text-sm text-gray-600 dark:text-slate-400">Pedidos</div>
+          <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">{sales.totalOrders}</div>
         </div>
       </div>
 
@@ -133,23 +133,24 @@ export default function SupplierDashboard() {
             + Novo Produto
           </button>
         ) : (
-          <form onSubmit={submit} className="border p-4 rounded space-y-3">
+          <form onSubmit={submit} className="border p-4 rounded space-y-3 dark:border-slate-800 dark:bg-slate-900">
+            <h3 className="font-bold text-lg text-slate-900 dark:text-slate-100">{editingId ? 'Editar' : 'Criar'} Produto</h3>
             <input
-              className="w-full border p-2 rounded"
+              className="w-full border p-2 rounded dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
               placeholder="Nome do Produto"
               value={form.name}
               onChange={e => setForm({ ...form, name: e.target.value })}
               required
             />
             <textarea
-              className="w-full border p-2 rounded"
+              className="w-full border p-2 rounded dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
               placeholder="Descrição"
               value={form.description}
               onChange={e => setForm({ ...form, description: e.target.value })}
               rows="3"
             />
             <input
-              className="w-full border p-2 rounded"
+              className="w-full border p-2 rounded dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
               placeholder="Preço"
               type="number"
               step="0.01"
@@ -158,7 +159,7 @@ export default function SupplierDashboard() {
               required
             />
             <input
-              className="w-full border p-2 rounded"
+              className="w-full border p-2 rounded dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
               placeholder="Estoque"
               type="number"
               value={form.stock}
@@ -166,7 +167,7 @@ export default function SupplierDashboard() {
               required
             />
             <input
-              className="w-full border p-2 rounded"
+              className="w-full border p-2 rounded dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
               placeholder="Limite de Estoque Baixo"
               type="number"
               value={form.lowStockThreshold}
@@ -187,17 +188,17 @@ export default function SupplierDashboard() {
 
       {/* Products List */}
       <div>
-        <h2 className="text-2xl font-bold mb-3">Meus Produtos ({products.length})</h2>
+        <h2 className="text-2xl font-bold mb-3 text-slate-900 dark:text-slate-100">Meus Produtos ({products.length})</h2>
         {products.length === 0 ? (
-          <p className="text-gray-500">Nenhum produto cadastrado</p>
+          <p className="text-gray-500 dark:text-slate-500">Nenhum produto cadastrado</p>
         ) : (
           <div className="space-y-3">
             {products.map(p => (
-              <div key={p.id} className="border p-4 rounded flex justify-between items-start">
+              <div key={p.id} className="border p-4 rounded flex justify-between items-start dark:border-slate-800 dark:bg-slate-900">
                 <div className="flex-1">
-                  <h3 className="font-bold text-lg">{p.name}</h3>
-                  {p.description && <p className="text-sm text-gray-600 mb-2">{p.description}</p>}
-                  <div className="grid grid-cols-3 gap-4 text-sm">
+                  <h3 className="font-bold text-lg text-slate-900 dark:text-slate-100">{p.name}</h3>
+                  {p.description && <p className="text-sm text-gray-600 dark:text-slate-400 mb-2">{p.description}</p>}
+                  <div className="grid grid-cols-3 gap-4 text-sm text-slate-700 dark:text-slate-300">
                     <div><span className="font-semibold">Preço:</span> R$ {parseFloat(p.price).toFixed(2)}</div>
                     <div><span className="font-semibold">Estoque:</span> {p.stock}</div>
                     <div><span className="font-semibold">Status:</span> {p.active ? '✓ Ativo' : '✗ Inativo'}</div>

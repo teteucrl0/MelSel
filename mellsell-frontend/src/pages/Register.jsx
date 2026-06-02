@@ -101,17 +101,17 @@ export default function Register() {
   }
 
   return (
-    <div className="mx-auto max-w-md rounded-lg border-2 border-amber-200 bg-white p-6 shadow-md">
-      <h2 className="font-serif text-2xl font-bold text-amber-900">Registrar-se</h2>
-      <p className="mt-1 text-sm text-amber-700">Junte-se à nossa família!</p>
+    <div className="mx-auto max-w-md rounded-lg border-2 border-amber-200 bg-white p-6 shadow-md dark:border-slate-800 dark:bg-slate-900">
+      <h2 className="font-serif text-2xl font-bold text-amber-900 dark:text-slate-100">Registrar-se</h2>
+      <p className="mt-1 text-sm text-amber-700 dark:text-slate-400">Junte-se à nossa família!</p>
       
-      {error && <div className="mt-4 rounded-md border-2 border-red-300 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
+      {error && <div className="mt-4 rounded-md border-2 border-red-300 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-400">{error}</div>}
       
       <form onSubmit={submit} className="mt-4 space-y-4">
         <div>
-          <label className="block text-sm font-medium text-amber-800">Nome</label>
+          <label className="block text-sm font-medium text-amber-800 dark:text-slate-300">Nome</label>
           <input 
-            className="mt-1 w-full rounded-md border-2 border-amber-300 bg-white p-2 text-amber-900 placeholder-amber-400 focus:border-amber-500 focus:outline-none" 
+            className="mt-1 w-full rounded-md border-2 border-amber-300 bg-white p-2 text-amber-900 placeholder-amber-400 focus:border-amber-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-amber-500" 
             placeholder="Seu nome completo" 
             value={name} 
             onChange={e => setName(e.target.value)} 
@@ -120,9 +120,9 @@ export default function Register() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-amber-800">Email</label>
+          <label className="block text-sm font-medium text-amber-800 dark:text-slate-300">Email</label>
           <input 
-            className="mt-1 w-full rounded-md border-2 border-amber-300 bg-white p-2 text-amber-900 placeholder-amber-400 focus:border-amber-500 focus:outline-none" 
+            className="mt-1 w-full rounded-md border-2 border-amber-300 bg-white p-2 text-amber-900 placeholder-amber-400 focus:border-amber-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-amber-500" 
             placeholder="seu@email.com" 
             type="email"
             value={email} 
@@ -132,21 +132,21 @@ export default function Register() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-amber-800">Data de Nascimento</label>
+          <label className="block text-sm font-medium text-amber-800 dark:text-slate-300">Data de Nascimento</label>
           <input 
-            className="mt-1 w-full rounded-md border-2 border-amber-300 bg-white p-2 text-amber-900 focus:border-amber-500 focus:outline-none" 
+            className="mt-1 w-full rounded-md border-2 border-amber-300 bg-white p-2 text-amber-900 focus:border-amber-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-amber-500" 
             type="date"
             value={birthDate}
             onChange={e => setBirthDate(e.target.value)}
             required
           />
-          <p className="mt-1 text-xs text-amber-600">É necessário ter no mínimo 18 anos</p>
+          <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">É necessário ter no mínimo 18 anos</p>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-amber-800">Tipo de Conta</label>
+          <label className="block text-sm font-medium text-amber-800 dark:text-slate-300">Tipo de Conta</label>
           <select 
-            className="mt-1 w-full rounded-md border-2 border-amber-300 bg-white p-2 text-amber-900 focus:border-amber-500 focus:outline-none"
+            className="mt-1 w-full rounded-md border-2 border-amber-300 bg-white p-2 text-amber-900 focus:border-amber-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-amber-500"
             value={role}
             onChange={e => setRole(e.target.value)}
           >
@@ -157,9 +157,9 @@ export default function Register() {
 
         {role === 'VENDEDOR' && (
           <div>
-            <label className="block text-sm font-medium text-amber-800">Nome da Loja/Empresa (Opcional)</label>
+            <label className="block text-sm font-medium text-amber-800 dark:text-slate-300">Nome da Loja/Empresa (Opcional)</label>
             <input 
-              className="mt-1 w-full rounded-md border-2 border-amber-300 bg-white p-2 text-amber-900 placeholder-amber-400 focus:border-amber-500 focus:outline-none" 
+              className="mt-1 w-full rounded-md border-2 border-amber-300 bg-white p-2 text-amber-900 placeholder-amber-400 focus:border-amber-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-amber-500" 
               placeholder="Ex: Mel do Campo, Apicultora Silva" 
               value={storeName}
               onChange={e => setStoreName(e.target.value)}
@@ -168,10 +168,10 @@ export default function Register() {
         )}
 
         <div>
-          <label className="block text-sm font-medium text-amber-800">Senha</label>
+          <label className="block text-sm font-medium text-amber-800 dark:text-slate-300">Senha</label>
           <input 
-            className={`mt-1 w-full rounded-md border-2 p-2 text-amber-900 placeholder-amber-400 focus:outline-none ${
-              password && !isPasswordValid(password) ? 'border-red-400' : 'border-amber-300'
+            className={`mt-1 w-full rounded-md border-2 p-2 text-amber-900 placeholder-amber-400 focus:outline-none dark:text-slate-100 dark:placeholder-slate-500 ${
+              password && !isPasswordValid(password) ? 'border-red-400' : 'border-amber-300 dark:border-slate-700 dark:bg-slate-800'
             } ${password && isPasswordValid(password) ? 'border-green-400' : ''}`}
             placeholder="Mínimo 8 caracteres" 
             type="password" 
@@ -185,36 +185,36 @@ export default function Register() {
           
           {password && (
             <div className="mt-3 space-y-2">
-              <div className="flex items-center justify-between text-xs text-amber-700">
+              <div className="flex items-center justify-between text-xs text-amber-700 dark:text-slate-400">
                 <span>Força: <span className="font-semibold">{getPasswordStrengthText()}</span></span>
                 <span className="font-bold">{passwordStrength}/5</span>
               </div>
               
-              <div className="h-2 w-full overflow-hidden rounded-full bg-amber-100">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-amber-100 dark:bg-slate-800">
                 <div 
                   className={`h-2 transition-all ${getPasswordStrengthColor()}`}
                   style={{width: `${(passwordStrength / 5) * 100}%`}}
                 ></div>
               </div>
 
-              <div className="rounded-md border border-amber-200 bg-amber-50 p-2">
-                <div className="flex items-center gap-2 text-xs text-amber-700">
+              <div className="rounded-md border border-amber-200 bg-amber-50 p-2 dark:border-slate-700 dark:bg-slate-800">
+                <div className="flex items-center gap-2 text-xs text-amber-700 dark:text-slate-400">
                   <span>{getPasswordRequirements(password).length ? '✅' : '❌'}</span>
                   <span>Mínimo 8 caracteres</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-amber-700">
+                <div className="flex items-center gap-2 text-xs text-amber-700 dark:text-slate-400">
                   <span>{getPasswordRequirements(password).lower ? '✅' : '❌'}</span>
                   <span>Letra minúscula (a-z)</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-amber-700">
+                <div className="flex items-center gap-2 text-xs text-amber-700 dark:text-slate-400">
                   <span>{getPasswordRequirements(password).upper ? '✅' : '❌'}</span>
                   <span>Letra maiúscula (A-Z)</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-amber-700">
+                <div className="flex items-center gap-2 text-xs text-amber-700 dark:text-slate-400">
                   <span>{getPasswordRequirements(password).digit ? '✅' : '❌'}</span>
                   <span>Número (0-9)</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-amber-700">
+                <div className="flex items-center gap-2 text-xs text-amber-700 dark:text-slate-400">
                   <span>{getPasswordRequirements(password).special ? '✅' : '❌'}</span>
                   <span>Caractere especial (@$!%*?&)</span>
                 </div>
@@ -231,8 +231,8 @@ export default function Register() {
         </button>
       </form>
 
-      <p className="mt-4 text-center text-sm text-amber-700">
-        Já tem conta? <a href="/login" className="font-semibold text-amber-600 hover:underline">Faça login</a>
+      <p className="mt-4 text-center text-sm text-amber-700 dark:text-slate-400">
+        Já tem conta? <a href="/login" className="font-semibold text-amber-600 hover:underline dark:text-amber-400">Faça login</a>
       </p>
     </div>
   )
