@@ -44,6 +44,7 @@ export default function Cart() {
       return
     }
     try {
+      await cartService.updateQuantity(id, quantity)
       await loadCart()
     } catch (err) {
       alert('Erro ao atualizar quantidade')

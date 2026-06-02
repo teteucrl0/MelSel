@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { hasRole, getUsername } from '../services/authUtil'
+import authService from '../services/authService'
 
 export default function Header() {
   const navigate = useNavigate()
@@ -8,7 +9,7 @@ export default function Header() {
   const username = token ? getUsername() : null
 
   const logout = () => {
-    localStorage.removeItem('token')
+    authService.logout()
     navigate('/')
     window.location.reload()
   }
