@@ -36,6 +36,10 @@ public class Order {
     @Column(precision = 10, scale = 2)
     private BigDecimal shippingCost;
 
+    @Column(precision = 10, scale = 2)
+    @Builder.Default
+    private BigDecimal discount = BigDecimal.ZERO;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<OrderItem> items = new ArrayList<>();
