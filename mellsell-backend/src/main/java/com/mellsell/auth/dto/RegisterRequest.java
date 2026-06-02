@@ -3,6 +3,8 @@ package com.mellsell.auth.dto;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -23,10 +25,8 @@ public class RegisterRequest {
             message = "Senha deve conter maiúscula, minúscula, número e caractere especial")
     private String password;
 
-    @NotNull(message = "Idade é obrigatória")
-    @Min(value = 21, message = "Você deve ter no mínimo 21 anos")
-    @Max(value = 150, message = "Idade inválida")
-    private Integer age;
+    @NotNull(message = "Data de nascimento é obrigatória")
+    private LocalDate birthDate;
 
     private String storeName;
 }

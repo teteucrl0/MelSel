@@ -20,48 +20,48 @@ export default function ProductCard({ product, onAdd, loading = false }) {
   const outOfStock = stock <= 0
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-slate-900/80 shadow-lg shadow-slate-950/20 transition duration-300 hover:-translate-y-1 hover:border-amber-400/30 hover:shadow-2xl hover:shadow-amber-950/20">
-      <div className="flex items-start justify-between gap-4 border-b border-white/5 bg-gradient-to-br from-amber-400/15 via-white/5 to-transparent p-5">
-        <div className="space-y-3">
+    <article className="flex h-full flex-col overflow-hidden rounded-lg border-2 border-amber-200 bg-white shadow-md transition hover:-translate-y-1 hover:shadow-lg">
+      <div className="flex items-start justify-between gap-4 border-b-2 border-amber-100 bg-amber-50 p-4">
+        <div className="space-y-2">
           <span
-            className={`inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] ${
+            className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-semibold ${
               outOfStock
-                ? 'bg-rose-500/15 text-rose-200 ring-1 ring-inset ring-rose-500/25'
-                : 'bg-emerald-500/15 text-emerald-200 ring-1 ring-inset ring-emerald-500/25'
+                ? 'bg-red-100 text-red-700'
+                : 'bg-green-100 text-green-700'
             }`}
           >
             {outOfStock ? 'Sem estoque' : 'Disponível'}
           </span>
-          <div className="grid h-12 w-12 place-items-center rounded-2xl bg-white/10 text-lg font-black text-white ring-1 ring-inset ring-white/10">
+          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-amber-200 text-sm font-bold text-amber-800">
             {getInitials(product.name)}
           </div>
         </div>
 
-        <div className="rounded-2xl bg-slate-950/60 px-4 py-3 text-right ring-1 ring-inset ring-white/10">
-          <div className="text-[11px] uppercase tracking-[0.24em] text-slate-400">Preço</div>
-          <div className="mt-1 text-2xl font-black text-amber-300">{price}</div>
+        <div className="rounded-md bg-white px-3 py-2 text-right border border-amber-200">
+          <div className="text-xs text-amber-600">Preço</div>
+          <div className="text-xl font-bold text-amber-700">{price}</div>
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col gap-4 p-5">
+      <div className="flex flex-1 flex-col gap-3 p-4">
         <div>
-          <h3 className="text-lg font-semibold leading-snug text-white transition group-hover:text-amber-200">
+          <h3 className="font-serif text-lg font-bold text-amber-900">
             <Link to={`/product/${product.id}`}>{product.name}</Link>
           </h3>
-          <p className="mt-2 min-h-12 text-sm leading-6 text-slate-300/90">
+          <p className="mt-2 min-h-10 text-sm text-amber-800/80">
             {product.description || 'Descrição indisponível no momento.'}
           </p>
         </div>
 
-        <div className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t border-white/5 pt-4">
-          <div className="text-sm text-slate-400">
-            <span className="font-semibold text-slate-100">{stock}</span> em estoque
+        <div className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t-2 border-amber-100 pt-3">
+          <div className="text-sm text-amber-700">
+            <span className="font-semibold text-amber-900">{stock}</span> em estoque
           </div>
 
           <div className="flex flex-wrap gap-2">
             <Link
               to={`/product/${product.id}`}
-              className="inline-flex items-center justify-center rounded-full border border-white/10 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-white/20 hover:bg-white/5 hover:text-white"
+              className="rounded-md border-2 border-amber-400 bg-white px-3 py-2 text-sm font-medium text-amber-800 transition hover:bg-amber-50"
             >
               Ver detalhes
             </Link>
@@ -69,7 +69,7 @@ export default function ProductCard({ product, onAdd, loading = false }) {
               type="button"
               onClick={() => onAdd(product.id)}
               disabled={loading || outOfStock}
-              className="inline-flex items-center justify-center rounded-full bg-amber-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
+              className="rounded-md bg-amber-500 px-3 py-2 text-sm font-semibold text-white transition hover:bg-amber-600 disabled:cursor-not-allowed disabled:bg-amber-200 disabled:text-amber-400"
             >
               {loading ? 'Adicionando...' : outOfStock ? 'Indisponível' : 'Adicionar'}
             </button>

@@ -1,6 +1,11 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import cartService from '../services/cartService'
 import { Link, useNavigate } from 'react-router-dom'
+
+const money = new Intl.NumberFormat('pt-BR', {
+  style: 'currency',
+  currency: 'BRL',
+})
 
 export default function Cart() {
   const [items, setItems] = useState([])
@@ -39,7 +44,6 @@ export default function Cart() {
       return
     }
     try {
-      // Update quantity via cartService if available
       await loadCart()
     } catch (err) {
       alert('Erro ao atualizar quantidade')
@@ -48,55 +52,55 @@ export default function Cart() {
 
   const totalPrice = items.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0)
 
-  if (loading) return <div className="text-center py-8">Carregando carrinho...</div>
+  if (loading) return <div className="py-8 text-center text-amber-700">Carregando carrinho...</div>
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-slate-100">Carrinho de Compras</h1>
+    <div className="mx-auto max-w-4xl">
+      <h1 className="font-serif text-2xl font-bold text-amber-900">Carrinho de Compras</h1>
       
       {items.length === 0 ? (
-        <div className="text-center py-12 bg-slate-800 rounded-lg">
-          <div className="text-2xl font-semibold text-slate-300 mb-4">🛒 Carrinho vazio</div>
-          <p className="text-slate-400 mb-6">Você ainda não adicionou nenhum produto</p>
-          <Link to="/" className="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded font-bold">
+        <div className="mt-6 rounded-lg border-2 border-amber-200 bg-amber-50 p-8 text-center">
+          <div className="text-3xl">🍯</div>
+          <div className="mt-2 font-serif text-xl font-semibold text-amber-900">Carrinho vazio</div>
+          <p className="mt-2 text-sm text-amber-700">Você ainda não adicionou nenhum produto</p>
+          <Link to="/" className="mt-4 inline-block rounded-md bg-amber-500 px-6 py-2 font-semibold text-white hover:bg-amber-600">
             Continuar comprando
           </Link>
         </div>
       ) : (
-        <div className="grid md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 space-y-3">
+        <div className="mt-6 grid gap-6 md:grid-cols-3">
+          <div className="space-y-3 md:col-span-2">
             {items.map(item => (
-              <div key={item.id} className="bg-slate-800 p-4 rounded-lg flex gap-4 items-start">
+              <div key={item.id} className="flex gap-4 rounded-lg border-2 border-amber-200 bg-white p-4">
                 <div className="flex-1">
-                  <h3 className="font-bold text-lg text-slate-100">{item.productName}</h3>
-                  <div className="text-sm text-slate-400 mt-2">
-                    <div>Preço unitário: <span className="text-yellow-400">R$ {item.unitPrice.toFixed(2)}</span></div>
-                    <div>Quantidade: 
-                      <div className="flex gap-2 mt-1">
-                        <button 
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          className="bg-slate-700 hover:bg-slate-600 text-white px-2 py-1 rounded"
-                        >
-                          −
-                        </button>
-                        <span className="text-white px-3 py-1 bg-slate-700 rounded">{item.quantity}</span>
-                        <button 
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          className="bg-slate-700 hover:bg-slate-600 text-white px-2 py-1 rounded"
-                        >
-                          +
-                        </button>
-                      </div>
+                  <h3 className="font-serif text-lg font-bold text-amber-900">{item.productName}</h3>
+                  <div className="mt-2 text-sm text-amber-700">
+                    <div>Preço unitário: <span className="font-semibold text-amber-600">{money.format(item.unitPrice)}</span></div>
+                    <div className="mt-2 flex items-center gap-2">
+                      <span>Quantidade:</span>
+                      <button 
+                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        className="rounded-md border-2 border-amber-300 bg-white px-2 py-1 font-bold text-amber-700 hover:bg-amber-50"
+                      >
+                        −
+                      </button>
+                      <span className="rounded-md border-2 border-amber-200 bg-amber-50 px-3 py-1 font-semibold text-amber-900">{item.quantity}</span>
+                      <button 
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        className="rounded-md border-2 border-amber-300 bg-white px-2 py-1 font-bold text-amber-700 hover:bg-amber-50"
+                      >
+                        +
+                      </button>
                     </div>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-lg font-bold text-yellow-400">
-                    R$ {(item.unitPrice * item.quantity).toFixed(2)}
+                  <div className="text-lg font-bold text-amber-600">
+                    {money.format(item.unitPrice * item.quantity)}
                   </div>
                   <button 
                     onClick={() => remove(item.id)}
-                    className="text-red-400 hover:text-red-300 text-sm mt-2 font-semibold"
+                    className="mt-2 text-sm font-semibold text-red-600 hover:text-red-700"
                   >
                     Remover
                   </button>
@@ -105,31 +109,33 @@ export default function Cart() {
             ))}
           </div>
 
-          <div className="bg-slate-800 p-6 rounded-lg h-fit">
-            <h2 className="text-xl font-bold text-slate-100 mb-4">Resumo</h2>
-            <div className="space-y-2 mb-6">
-              <div className="flex justify-between text-slate-300">
+          <div className="rounded-lg border-2 border-amber-200 bg-white p-6">
+            <h2 className="font-serif text-lg font-bold text-amber-900">Resumo</h2>
+            <div className="mt-4 space-y-2">
+              <div className="flex justify-between text-amber-700">
                 <span>Subtotal:</span>
-                <span>R$ {totalPrice.toFixed(2)}</span>
+                <span>{money.format(totalPrice)}</span>
               </div>
-              <div className="flex justify-between text-slate-300">
+              <div className="flex justify-between text-amber-700">
                 <span>Frete:</span>
-                <span className="text-green-400">Grátis</span>
+                <span className="text-green-600">Grátis</span>
               </div>
-              <div className="border-t border-slate-600 pt-2 flex justify-between text-lg font-bold text-yellow-400">
-                <span>Total:</span>
-                <span>R$ {totalPrice.toFixed(2)}</span>
+              <div className="border-t-2 border-amber-100 pt-2 text-lg font-bold text-amber-900">
+                <div className="flex justify-between">
+                  <span>Total:</span>
+                  <span>{money.format(totalPrice)}</span>
+                </div>
               </div>
             </div>
             <button 
               onClick={() => navigate('/checkout')}
-              className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold px-4 py-3 rounded transition"
+              className="mt-4 w-full rounded-md bg-amber-500 px-4 py-3 font-semibold text-white transition hover:bg-amber-600"
             >
               Finalizar Compra
             </button>
             <Link 
               to="/"
-              className="block text-center mt-3 text-yellow-400 hover:text-yellow-300 font-semibold"
+              className="mt-3 block text-center font-semibold text-amber-600 hover:text-amber-700"
             >
               Continuar comprando
             </Link>

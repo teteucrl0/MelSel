@@ -9,11 +9,11 @@ const login = async (email, password) => {
   return r.data
 }
 
-const register = (name, email, password, age) => 
-  api.post('/api/auth/register', { name, email, password, age }).then(r => r.data)
+const register = (name, email, password, birthDate) => 
+  api.post('/api/auth/register', { name, email, password, birthDate }).then(r => r.data)
 
-const registerVendor = (name, email, password, age, storeName) => 
-  api.post('/api/auth/register/vendor', { name, email, password, age, storeName }).then(r => r.data)
+const registerVendor = (name, email, password, birthDate, storeName) => 
+  api.post('/api/auth/register/vendor', { name, email, password, birthDate, storeName }).then(r => r.data)
 
 const logout = () => {
   localStorage.removeItem('token')

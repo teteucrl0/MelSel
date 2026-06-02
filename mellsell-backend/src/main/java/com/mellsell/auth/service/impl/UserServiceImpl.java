@@ -43,15 +43,16 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Email já cadastrado");
         }
         
-        String ageError = ValidatorUtil.getAgeErrorMessage(req.getAge());
-        if (ageError != null) {
-            throw new IllegalArgumentException(ageError);
+        String birthDateError = ValidatorUtil.getBirthDateErrorMessage(req.getBirthDate());
+        if (birthDateError != null) {
+            throw new IllegalArgumentException(birthDateError);
         }
         
         if (!ValidatorUtil.isPasswordStrong(req.getPassword())) {
             throw new IllegalArgumentException(ValidatorUtil.getPasswordErrorMessage());
         }
         
+        int age = ValidatorUtil.calculateAge(req.getBirthDate());
         String firstName = extractFirstName(req.getName());
         
         User u = User.builder()
@@ -59,7 +60,7 @@ public class UserServiceImpl implements UserService {
                 .username(firstName)
                 .email(req.getEmail())
                 .password(passwordEncoder.encode(req.getPassword()))
-                .age(req.getAge())
+                .age(age)
                 .active(true)
                 .locked(false)
                 .failedLoginAttempts(0)
@@ -74,15 +75,16 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Email já cadastrado");
         }
         
-        String ageError = ValidatorUtil.getAgeErrorMessage(req.getAge());
-        if (ageError != null) {
-            throw new IllegalArgumentException(ageError);
+        String birthDateError = ValidatorUtil.getBirthDateErrorMessage(req.getBirthDate());
+        if (birthDateError != null) {
+            throw new IllegalArgumentException(birthDateError);
         }
         
         if (!ValidatorUtil.isPasswordStrong(req.getPassword())) {
             throw new IllegalArgumentException(ValidatorUtil.getPasswordErrorMessage());
         }
         
+        int age = ValidatorUtil.calculateAge(req.getBirthDate());
         String firstName = extractFirstName(req.getName());
         
         User u = User.builder()
@@ -90,7 +92,7 @@ public class UserServiceImpl implements UserService {
                 .username(firstName)
                 .email(req.getEmail())
                 .password(passwordEncoder.encode(req.getPassword()))
-                .age(req.getAge())
+                .age(age)
                 .storeName(req.getStoreName())
                 .active(true)
                 .locked(false)
@@ -217,7 +219,6 @@ public class UserServiceImpl implements UserService {
         }
         String firstName = fullName.split("\\s+")[0].toLowerCase();
         
-        // Garantir que é único adicionando número se necessário
         String baseUsername = firstName;
         int counter = 1;
         while (userRepository.findByUsername(firstName).isPresent()) {
