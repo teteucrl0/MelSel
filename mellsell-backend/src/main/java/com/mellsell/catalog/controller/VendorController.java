@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -72,12 +73,17 @@ public class VendorController {
         couponRepository.delete(coupon);
     }
 
-    @PostMapping("/coupons/validate")
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/coupons/validate")
     public CouponDTO validateCoupon(@RequestParam String code) {
         Coupon coupon = couponRepository.findByCode(code.toUpperCase())
                 .orElseThrow(() -> new ResourceNotFoundException("Cupom não encontrado"));
         if (!coupon.getActive() || coupon.getUsedCount() >= coupon.getMaxUses()) {
             throw new IllegalArgumentException("Cupom inválido ou expirado");
+        }
+        LocalDateTime now = LocalDateTime.now();
+        if (now.isBefore(coupon.getValidFrom()) || now.isAfter(coupon.getValidUntil())) {
+            throw new IllegalArgumentException("Cupom fora do período de validade");
         }
         return mapCouponToDTO(coupon);
     }
