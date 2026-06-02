@@ -9,6 +9,7 @@ import com.mellsell.catalog.entity.Coupon;
 import com.mellsell.catalog.entity.Promotion;
 import com.mellsell.catalog.entity.Supplier;
 import com.mellsell.catalog.repository.CouponRepository;
+import com.mellsell.catalog.repository.ProductRepository;
 import com.mellsell.catalog.repository.PromotionRepository;
 import com.mellsell.catalog.repository.SupplierRepository;
 import jakarta.validation.Valid;
@@ -27,6 +28,7 @@ public class VendorController {
     private final CouponRepository couponRepository;
     private final PromotionRepository promotionRepository;
     private final SupplierRepository supplierRepository;
+    private final ProductRepository productRepository;
     private final UserService userService;
 
     private User currentUser() {
@@ -74,13 +76,64 @@ public class VendorController {
     public CouponDTO validateCoupon(@RequestParam String code) {
         Coupon coupon = couponRepository.findByCode(code.toUpperCase())
                 .orElseThrow(() -> new ResourceNotFoundException("Cupom não encontrado"));
-        
         if (!coupon.getActive() || coupon.getUsedCount() >= coupon.getMaxUses()) {
             throw new IllegalArgumentException("Cupom inválido ou expirado");
         }
-        
         return mapCouponToDTO(coupon);
     }
+
+    // ─── Promoções ────────────────────────────────────────────────────────────
+
+    @PreAuthorize("hasRole('VENDEDOR')")
+    @PostMapping("/promotions")
+    public PromotionDTO createPromotion(@Valid @RequestBody PromotionDTO dto) {
+        var product = productRepository.findById(dto.getProductId())
+                .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado"));
+        Promotion promo = Promotion.builder()
+                .name(dto.getName())
+                .product(product)
+                .discountPercentage(dto.getDiscountPercentage())
+                .discountFixed(dto.getDiscountFixed())
+                .startDate(dto.getStartDate())
+                .endDate(dto.getEndDate())
+                .active(true)
+                .build();
+        return mapPromotionToDTO(promotionRepository.save(promo));
+    }
+
+    @PreAuthorize("hasRole('VENDEDOR')")
+    @GetMapping("/promotions")
+    public List<PromotionDTO> listPromotions() {
+        Supplier supplier = currentSupplier();
+        return promotionRepository.findAll().stream()
+                .filter(p -> p.getProduct().getSupplier() != null &&
+                             p.getProduct().getSupplier().getId().equals(supplier.getId()))
+                .map(this::mapPromotionToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @PreAuthorize("hasRole('VENDEDOR')")
+    @PutMapping("/promotions/{id}")
+    public PromotionDTO togglePromotion(@PathVariable Long id) {
+        Promotion promo = promotionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Promoção não encontrada"));
+        promo.setActive(!promo.getActive());
+        return mapPromotionToDTO(promotionRepository.save(promo));
+    }
+
+    @PreAuthorize("hasRole('VENDEDOR')")
+    @DeleteMapping("/promotions/{id}")
+    public void deletePromotion(@PathVariable Long id) {
+        Promotion promo = promotionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Promoção não encontrada"));
+        Supplier supplier = currentSupplier();
+        if (!promo.getProduct().getSupplier().getId().equals(supplier.getId())) {
+            throw new ResourceNotFoundException("Promoção não encontrada");
+        }
+        promotionRepository.delete(promo);
+    }
+
+    // ─── Mappers ──────────────────────────────────────────────────────────────
 
     private CouponDTO mapCouponToDTO(Coupon coupon) {
         return CouponDTO.builder()
