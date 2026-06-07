@@ -1,4 +1,24 @@
+# Ferramentas locais / AI
 .aider*
+.grok/
+
+# Dados e uploads do usuário (não versionar)
 uploads/
 mellsell-backend/uploads/
 mellsell-backend/data/
+
+# Logs, PIDs e temporários de execução
+*.log
+*.log.*
+*.pid
+run.pid
+run.log
+run2.*
+mellsell-backend/run-*
+mellsell-frontend/run-*
+
+# Binários / builds que eventualmente escapem
+*.jar
+*.class
+dist/
+build/
