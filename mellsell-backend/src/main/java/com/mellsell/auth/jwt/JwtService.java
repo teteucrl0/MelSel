@@ -27,7 +27,14 @@ public class JwtService {
     }
 
     public String generateToken(UserDetails userDetails) {
-        Map<String, Object> claims = Map.of("roles", userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
+        return generateToken(userDetails, userDetails.getUsername());
+    }
+
+    public String generateToken(UserDetails userDetails, String displayName) {
+        Map<String, Object> claims = Map.of(
+                "roles", userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()),
+                "displayName", displayName != null && !displayName.isBlank() ? displayName : userDetails.getUsername()
+        );
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(userDetails.getUsername())

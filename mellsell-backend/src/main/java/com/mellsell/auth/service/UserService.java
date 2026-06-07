@@ -1,5 +1,6 @@
 package com.mellsell.auth.service;
 
+import com.mellsell.auth.dto.AdminUpdateUserDTO;
 import com.mellsell.auth.dto.AdminUserResponseDTO;
 import com.mellsell.auth.dto.RegisterRequest;
 import com.mellsell.auth.entity.Role;
@@ -21,9 +22,13 @@ public interface UserService extends UserDetailsService {
     void unlockUser(Long userId);
 
     Page<AdminUserResponseDTO> listUsers(Pageable pageable);
+
+    Page<AdminUserResponseDTO> listUsers(String q, Role role, Pageable pageable);
     AdminUserResponseDTO getById(Long id);
     AdminUserResponseDTO updateRoles(Long id, Set<Role> roles, Long actingUserId);
     AdminUserResponseDTO setActive(Long id, Boolean active);
+
+    AdminUserResponseDTO adminUpdateUser(Long id, AdminUpdateUserDTO dto, Long actingUserId);
 
     List<AdminUserResponseDTO> listUsersByRole(Role role);
 }

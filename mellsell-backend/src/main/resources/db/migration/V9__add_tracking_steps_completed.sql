@@ -1,0 +1,1 @@
+ALTER TABLE orders ADD COLUMN tracking_steps_completed INT NOT NULL DEFAULT 0;

@@ -25,6 +25,15 @@ public class Supplier {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @Column(length = 80)
+    private String city;
+
+    @Column(length = 2)
+    private String state;
+
     @Column(nullable = false)
     private Boolean active = true;
 

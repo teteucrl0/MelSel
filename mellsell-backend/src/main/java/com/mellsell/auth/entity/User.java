@@ -3,6 +3,7 @@ package com.mellsell.auth.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -52,6 +53,12 @@ public class User {
 
     @Column(nullable = false)
     private Integer age;
+
+    @Column(name = "birth_date")
+    private LocalDate birthDate;
+
+    @Column(name = "avatar_url", length = 512)
+    private String avatarUrl;
 
     @Column(name = "last_login")
     private LocalDateTime lastLogin;

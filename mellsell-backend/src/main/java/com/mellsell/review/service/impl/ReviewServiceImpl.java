@@ -4,6 +4,7 @@ import com.mellsell.auth.entity.User;
 import com.mellsell.catalog.entity.Product;
 import com.mellsell.catalog.exception.ResourceNotFoundException;
 import com.mellsell.catalog.repository.ProductRepository;
+import com.mellsell.common.util.InputSanitizer;
 import com.mellsell.review.dto.CreateReviewRequest;
 import com.mellsell.review.dto.ReviewResponseDTO;
 import com.mellsell.review.entity.Review;
@@ -38,15 +39,23 @@ public class ReviewServiceImpl implements ReviewService {
         boolean purchased = orderRepository.findByUserId(user.getId()).stream()
                 .filter(o -> o.getStatus() == com.mellsell.order.entity.OrderStatus.CONFIRMED)
                 .anyMatch(o -> o.getItems().stream().anyMatch(oi -> oi.getProductId().equals(product.getId())));
-        if (!purchased) {
-            throw new IllegalStateException("Apenas usuários que compraram este produto podem avaliá-lo");
+        if (product.getSupplier() != null
+                && product.getSupplier().getOwner() != null
+                && Objects.equals(product.getSupplier().getOwner().getId(), user.getId())) {
+            throw new IllegalStateException("O produtor não pode avaliar o próprio produto");
         }
+
+        if (!purchased) {
+            throw new IllegalStateException("Apenas clientes que compraram este produto podem avaliá-lo");
+        }
+
+        String safeComment = InputSanitizer.safeReviewComment(req.getComment());
 
         Review r = Review.builder()
                 .product(product)
                 .user(user)
                 .rating(req.getRating())
-                .comment(req.getComment())
+                .comment(safeComment)
                 .build();
 
         r = reviewRepository.save(r);

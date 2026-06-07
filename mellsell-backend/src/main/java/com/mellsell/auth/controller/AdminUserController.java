@@ -1,6 +1,7 @@
 package com.mellsell.auth.controller;
 
 import com.mellsell.auth.dto.ActiveUpdateDTO;
+import com.mellsell.auth.dto.AdminUpdateUserDTO;
 import com.mellsell.auth.dto.AdminUserResponseDTO;
 import com.mellsell.auth.dto.RoleUpdateDTO;
 import com.mellsell.auth.entity.Role;
@@ -36,10 +37,20 @@ public class AdminUserController {
     @GetMapping
     public ResponseEntity<Page<AdminUserResponseDTO>> list(
             @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "20") int size
+            @RequestParam(name = "size", defaultValue = "20") int size,
+            @RequestParam(name = "q", required = false) String q,
+            @RequestParam(name = "role", required = false) String roleStr
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<AdminUserResponseDTO> result = userService.listUsers(pageable);
+        Role role = null;
+        if (roleStr != null && !roleStr.isBlank()) {
+            try {
+                role = Role.valueOf(roleStr.toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                return ResponseEntity.badRequest().build();
+            }
+        }
+        Page<AdminUserResponseDTO> result = userService.listUsers(q, role, pageable);
         return ResponseEntity.ok(result);
     }
 
@@ -75,6 +86,15 @@ public class AdminUserController {
     public ResponseEntity<AdminUserResponseDTO> setActive(@PathVariable Long id,
                                                           @Valid @RequestBody ActiveUpdateDTO dto) {
         AdminUserResponseDTO updated = userService.setActive(id, dto.getActive());
+        return ResponseEntity.ok(updated);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<AdminUserResponseDTO> updateUser(@PathVariable Long id,
+                                                           @Valid @RequestBody AdminUpdateUserDTO dto,
+                                                           Authentication authentication) {
+        Long actingUserId = userService.findByEmail(authentication.getName()).map(User::getId).orElse(null);
+        AdminUserResponseDTO updated = userService.adminUpdateUser(id, dto, actingUserId);
         return ResponseEntity.ok(updated);
     }
 

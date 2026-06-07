@@ -40,6 +40,12 @@ public class ValidatorUtil {
         if (birthDate == null) {
             return "Data de nascimento é obrigatória";
         }
+        if (birthDate.getMonthValue() < 1 || birthDate.getMonthValue() > 12) {
+            return "Mês inválido. Use um valor entre 01 e 12.";
+        }
+        if (birthDate.getDayOfMonth() < 1 || birthDate.getDayOfMonth() > birthDate.lengthOfMonth()) {
+            return "Dia inválido para o mês informado.";
+        }
         int age = calculateAge(birthDate);
         if (age < MIN_AGE) {
             return "Você deve ter no mínimo " + MIN_AGE + " anos para se registrar. Sua idade: " + age + " anos.";
@@ -61,12 +67,12 @@ public class ValidatorUtil {
         boolean hasUpperCase = password.matches(".*[A-Z].*");
         boolean hasLowerCase = password.matches(".*[a-z].*");
         boolean hasDigit = password.matches(".*\\d.*");
-        boolean hasSpecialChar = password.matches(".*[@$!%*?&].*");
-        
+        boolean hasSpecialChar = password.matches(".*[^A-Za-z0-9].*");
+
         return hasUpperCase && hasLowerCase && hasDigit && hasSpecialChar;
     }
 
     public static String getPasswordErrorMessage() {
-        return "Senha deve ter: mínimo 8 caracteres, maiúscula, minúscula, número e caractere especial (@$!%*?&)";
+        return "Senha deve ter: mínimo 8 caracteres, maiúscula, minúscula, número e caractere especial";
     }
 }

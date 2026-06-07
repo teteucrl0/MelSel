@@ -16,6 +16,8 @@ public class CreateProductDTO {
 
     private String description;
 
+    private String imageUrl;
+
     @NotNull(message = "Preço é obrigatório")
     @DecimalMin(value = "0.01", message = "Preço deve ser >= 0.01")
     private BigDecimal price;

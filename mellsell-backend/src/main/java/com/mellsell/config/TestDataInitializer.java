@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 
 @Component
-@Profile("h2")
+@Profile({"h2", "presentation"})
 public class TestDataInitializer implements CommandLineRunner {
 
     private final SupplierRepository supplierRepository;

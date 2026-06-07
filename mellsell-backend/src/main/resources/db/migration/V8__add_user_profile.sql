@@ -1,0 +1,2 @@
+ALTER TABLE users ADD COLUMN avatar_url VARCHAR(512);
+ALTER TABLE users ADD COLUMN birth_date DATE;

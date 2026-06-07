@@ -1,0 +1,1 @@
+export const VENDOR_NOTIFICATION_EVENT = 'mellsell-vendor-notification'

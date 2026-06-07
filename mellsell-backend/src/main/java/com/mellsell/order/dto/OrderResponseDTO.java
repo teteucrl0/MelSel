@@ -18,6 +18,12 @@ public class OrderResponseDTO {
     private BigDecimal shippingCost;
     private BigDecimal discount;
     private String shippingAddress;
+    private Long supplierId;
+    private String supplierName;
+    private String trackingCode;
+    private String carrier;
+    private String deliveryStatus;
+    private Integer deliveryProgress;
     private List<OrderItemDTO> items;
     private LocalDateTime createdAt;
 
@@ -28,6 +34,8 @@ public class OrderResponseDTO {
     @Builder
     public static class OrderItemDTO {
         private Long productId;
+        private Long supplierId;
+        private String supplierName;
         private String productName;
         private BigDecimal unitPrice;
         private Integer quantity;

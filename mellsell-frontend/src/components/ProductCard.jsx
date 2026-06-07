@@ -1,81 +1,154 @@
 import { Link } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
+import ProductImage from './ProductImage'
+import ProductSupplierLabel from './ProductSupplierLabel'
+import { AnimatedButton, variants } from './motion/Motion'
+import FlaticonIcon from './FlaticonIcon'
 
-const money = new Intl.NumberFormat('pt-BR', {
-  style: 'currency',
-  currency: 'BRL',
-})
+const money = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
 
-function getInitials(name = '') {
-  return name
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join('')
+function IconEye() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5" aria-hidden>
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  )
 }
 
-export default function ProductCard({ product, onAdd, loading = false }) {
+function IconCart() {
+  return <FlaticonIcon name="cart" size="sm" className="product-card-cart-icon" />
+}
+
+function IconSpinner() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5 animate-spin" aria-hidden>
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" strokeOpacity="0.25" />
+      <path d="M12 3a9 9 0 019 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function IconEdit() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5" aria-hidden>
+      <path d="M12 20h9M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4 12.5-12.5z" />
+    </svg>
+  )
+}
+
+export default function ProductCard({
+  product,
+  onAdd,
+  loading = false,
+  flash = false,
+  ownSupplierId = null,
+  isVendor = false,
+  supplierLoading = false,
+}) {
   const stock = Number(product.stock ?? 0)
   const price = money.format(Number(product.price ?? 0))
   const outOfStock = stock <= 0
+  const isOwnProduct =
+    ownSupplierId != null &&
+    product.supplierId != null &&
+    Number(product.supplierId) === Number(ownSupplierId)
 
   return (
-    <article className="flex h-full flex-col overflow-hidden rounded-lg border-2 border-amber-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-md transition hover:-translate-y-1 hover:shadow-lg">
-      <div className="flex items-start justify-between gap-4 border-b-2 border-amber-100 dark:border-slate-800 bg-amber-50 dark:bg-slate-800/50 p-4">
-        <div className="space-y-2">
-          <span
-            className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-semibold ${
-              outOfStock
-                ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
-                : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-            }`}
-          >
-            {outOfStock ? 'Sem estoque' : 'Disponível'}
+    <motion.article
+      whileHover={{ y: -5 }}
+      transition={{ type: 'spring', stiffness: 420, damping: 30 }}
+      className={`surface surface-interactive group flex h-full flex-col overflow-hidden ${flash ? 'stock-flash' : ''}`}
+    >
+      {/* Image with premium treatment */}
+      <Link to={`/product/${product.id}`} className="block overflow-hidden relative">
+        <motion.div 
+          whileHover={{ scale: 1.035 }} 
+          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }} 
+          className="overflow-hidden"
+        >
+          <ProductImage imageUrl={product.imageUrl} alt={product.name} />
+        </motion.div>
+        
+        {/* Subtle gradient overlay on image for text readability if needed */}
+        <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+      </Link>
+
+      <div className="flex flex-1 flex-col p-4 pt-3.5">
+        {/* Status row — elegant */}
+        <div className="mb-1.5 flex items-center justify-between">
+          <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold tracking-[0.5px] rounded-full ${outOfStock ? 'bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-400' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400'}`}>
+            <span className={`inline-block h-1.5 w-1.5 rounded-full ${outOfStock ? 'bg-red-500' : 'bg-emerald-500'}`} />
+            {outOfStock ? 'ESGOTADO' : 'DISPONÍVEL'}
           </span>
-          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-amber-200 dark:bg-slate-700 text-sm font-bold text-amber-800 dark:text-slate-200">
-            {getInitials(product.name)}
+
+          <motion.div 
+            key={stock}
+            initial={{ scale: 0.85, opacity: 0.6 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="flex items-baseline gap-1 text-[10px] font-medium tabular-nums text-muted"
+          >
+            <span className="font-semibold text-base leading-none text-stone-800 dark:text-stone-100">{stock}</span>
+            <span className="text-[10px]">un.</span>
+          </motion.div>
+        </div>
+
+        {/* Title */}
+        <h3 className="text-[15px] font-semibold leading-tight tracking-[-0.2px] text-stone-900 dark:text-stone-50 line-clamp-2 group-hover:text-brand-700 dark:group-hover:text-brand-400 transition-colors">
+          <Link to={`/product/${product.id}`}>
+            {product.name}
+          </Link>
+        </h3>
+
+        <ProductSupplierLabel name={product.supplierName} />
+
+        {/* Description */}
+        <p className="mt-1.5 mb-2 line-clamp-2 flex-1 text-[13px] leading-snug text-muted">
+          {product.description || 'Mel artesanal puro, colhido com cuidado por famílias apicultoras.'}
+        </p>
+
+        {/* Footer: Price + Actions (more elegant) */}
+        <div className="mt-auto flex items-end justify-between pt-3 border-t border-stone-100 dark:border-stone-800">
+          <div>
+            <div className="text-[10px] font-medium text-muted tracking-widest">PREÇO</div>
+            <div className="product-card-price text-xl font-semibold tabular-nums tracking-tight text-stone-950 dark:text-white">
+              {price}
+            </div>
           </div>
-        </div>
 
-        <div className="rounded-md bg-white dark:bg-slate-900 px-3 py-2 text-right border border-amber-200 dark:border-slate-700">
-          <div className="text-xs text-amber-600 dark:text-slate-400">Preço</div>
-          <div className="text-xl font-bold text-amber-700 dark:text-slate-200">{price}</div>
-        </div>
-      </div>
-
-      <div className="flex flex-1 flex-col gap-3 p-4">
-        <div>
-          <h3 className="font-serif text-lg font-bold text-amber-900 dark:text-white">
-            <Link to={`/product/${product.id}`}>{product.name}</Link>
-          </h3>
-          <p className="mt-2 min-h-10 text-sm text-amber-800/80 dark:text-slate-400">
-            {product.description || 'Descrição indisponível no momento.'}
-          </p>
-        </div>
-
-        <div className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t-2 border-amber-100 dark:border-slate-800 pt-3">
-          <div className="text-sm text-amber-700 dark:text-slate-400">
-            <span className="font-semibold text-amber-900 dark:text-slate-200">{stock}</span> em estoque
-          </div>
-
-          <div className="flex flex-wrap gap-2">
+          <div className="flex items-center gap-1.5">
             <Link
               to={`/product/${product.id}`}
-              className="rounded-md border-2 border-amber-400 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm font-medium text-amber-800 dark:text-slate-200 transition hover:bg-amber-50 dark:hover:bg-slate-700"
+              className="icon-btn icon-btn-secondary h-9 w-9 rounded-xl"
+              title="Ver detalhes e avaliações"
+              aria-label={`Ver detalhes de ${product.name}`}
             >
-              Ver detalhes
+              <IconEye />
             </Link>
-            <button
-              type="button"
-              onClick={() => onAdd(product.id)}
-              disabled={loading || outOfStock}
-              className="rounded-md bg-amber-500 px-3 py-2 text-sm font-semibold text-white transition hover:bg-amber-600 disabled:cursor-not-allowed disabled:bg-amber-200 dark:disabled:bg-slate-800 disabled:text-amber-400 dark:disabled:text-slate-600"
-            >
-              {loading ? 'Adicionando...' : outOfStock ? 'Indisponível' : 'Adicionar'}
-            </button>
+
+            {isOwnProduct ? (
+              <Link
+                to="/vendor/products"
+                className="icon-btn icon-btn-secondary h-9 w-9 rounded-xl"
+                title="Gerenciar seu produto"
+              >
+                <IconEdit />
+              </Link>
+            ) : (
+              <AnimatedButton
+                as="button"
+                type="button"
+                onClick={() => onAdd(product.id)}
+                disabled={loading || outOfStock || (isVendor && supplierLoading)}
+                className="icon-btn icon-btn-primary h-9 w-9 rounded-xl"
+                title={outOfStock ? 'Indisponível' : 'Adicionar ao carrinho'}
+              >
+                {loading ? <IconSpinner /> : <IconCart />}
+              </AnimatedButton>
+            )}
           </div>
         </div>
       </div>
-    </article>
+    </motion.article>
   )
 }

@@ -1,0 +1,2 @@
+ALTER TABLE orders ADD COLUMN tracking_code VARCHAR(20);
+ALTER TABLE orders ADD COLUMN carrier VARCHAR(40) DEFAULT 'Correios';

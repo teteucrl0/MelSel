@@ -23,7 +23,14 @@ if [ -f run-app.pid ]; then
   fi
 fi
 
-nohup env MELSELL_ADMIN_EMAIL="$MELSELL_ADMIN_EMAIL" MELSELL_ADMIN_PASSWORD="$MELSELL_ADMIN_PASSWORD" java -jar target/mellsell-backend-0.0.1-SNAPSHOT.jar --spring.profiles.active=h2 > run-app.log 2>&1 &
+nohup env \
+  MELSELL_ADMIN_EMAIL="$MELSELL_ADMIN_EMAIL" \
+  MELSELL_ADMIN_PASSWORD="$MELSELL_ADMIN_PASSWORD" \
+  MYSQL_USER="${MYSQL_USER:-mellsell}" \
+  MYSQL_PASSWORD="${MYSQL_PASSWORD:-mellsell}" \
+  java -jar target/mellsell-backend-0.0.1-SNAPSHOT.jar \
+  --spring.profiles.active=mysql \
+  > run-app.log 2>&1 &
 echo $! > run-app.pid
 
 echo "Started backend PID=$(cat run-app.pid)"

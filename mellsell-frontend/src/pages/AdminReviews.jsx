@@ -18,7 +18,7 @@ export default function AdminReviews() {
   return (
     <div className="max-w-3xl mx-auto">
       <h2 className="text-xl font-bold mb-4 text-slate-900 dark:text-slate-100">Moderação de Avaliações (Admin)</h2>
-      {loading && <div className="text-slate-700 dark:text-slate-300">Carregando...</div>}
+      {loading && <div className="min-h-8" aria-busy="true" />}
       <ul className="space-y-3">
         {pending.map(r => (
           <li key={r.id} className="border p-3 rounded dark:border-slate-800 dark:bg-slate-900">

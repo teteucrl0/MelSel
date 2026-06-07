@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import reportService from '../services/reportService'
+import PageHeader from '../components/PageHeader'
 
 export default function AdminReports() {
   const [items, setItems] = useState(null)
@@ -8,11 +9,12 @@ export default function AdminReports() {
   const loadJson = async () => {
     setLoading(true)
     try {
-      const data = await reportService.salesReport()
-      setItems(data)
-    } catch (e) {
-      alert('Falha ao carregar relatório')
-    } finally { setLoading(false) }
+      setItems(await reportService.salesReport())
+    } catch {
+      alert('Falha ao carregar relatório.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const downloadPdf = async () => {
@@ -28,15 +30,17 @@ export default function AdminReports() {
       a.click()
       a.remove()
       window.URL.revokeObjectURL(url)
-    } catch (e) {
-      alert('Falha ao baixar PDF')
-    } finally { setLoading(false) }
+    } catch {
+      alert('Falha ao baixar PDF.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const exportUsersByRole = async (role) => {
     setLoading(true)
     try {
-      const arrayBuffer = await import('../services/userService').then(m => m.default.exportByRole(role))
+      const arrayBuffer = await import('../services/userService').then((m) => m.default.exportByRole(role))
       const blob = new Blob([arrayBuffer], { type: 'application/pdf' })
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -46,42 +50,60 @@ export default function AdminReports() {
       a.click()
       a.remove()
       window.URL.revokeObjectURL(url)
-    } catch (e) {
-      alert('Falha ao exportar usuários')
-    } finally { setLoading(false) }
+    } catch {
+      alert('Falha ao exportar usuários.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <h2 className="text-xl font-bold mb-4 text-slate-900 dark:text-slate-100">Relatórios - Admin</h2>
-      <div className="space-x-2 mb-4">
-        <button onClick={loadJson} className="bg-yellow-500 text-white px-3 py-1 rounded">Carregar JSON</button>
-        <button onClick={downloadPdf} className="bg-gray-800 text-white px-3 py-1 rounded dark:bg-slate-700">Baixar PDF</button>
-        <div className="inline-block ml-2">
-          <label className="mr-2 text-slate-800 dark:text-slate-300">Exportar usuários por papel:</label>
-          <button onClick={() => exportUsersByRole('CLIENTE')} className="bg-blue-600 text-white px-2 py-1 rounded mr-1">Cliente</button>
-          <button onClick={() => exportUsersByRole('VENDEDOR')} className="bg-blue-600 text-white px-2 py-1 rounded mr-1">Vendedor</button>
-          <button onClick={() => exportUsersByRole('ADMIN')} className="bg-blue-600 text-white px-2 py-1 rounded">Admin</button>
+    <div className="fade-in max-w-4xl">
+      <PageHeader title="Relatórios" description="Exportação de vendas e usuários." />
+
+      <div className="surface flex flex-wrap gap-2 p-4">
+        <button type="button" onClick={loadJson} disabled={loading} className="btn-primary">
+          Carregar dados
+        </button>
+        <button type="button" onClick={downloadPdf} disabled={loading} className="btn-secondary">
+          Baixar PDF de vendas
+        </button>
+      </div>
+
+      <div className="surface mt-4 p-4">
+        <p className="text-sm font-medium text-stone-900 dark:text-stone-50">Exportar usuários por papel</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {['CLIENTE', 'VENDEDOR', 'ADMIN'].map((role) => (
+            <button key={role} type="button" onClick={() => exportUsersByRole(role)} disabled={loading} className="btn-secondary text-sm">
+              {role}
+            </button>
+          ))}
         </div>
       </div>
-      {loading && <div className="text-slate-700 dark:text-slate-300">Carregando...</div>}
+
+      {loading && <p className="mt-4 text-sm text-muted">Processando...</p>}
+
       {items && (
-        <table className="w-full border-collapse text-slate-900 dark:text-slate-300">
-          <thead>
-            <tr className="text-left">
-              <th className="pb-2">Produto</th><th className="pb-2">Quantidade</th><th className="pb-2">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map(it => (
-              <tr key={it.productId} className="border-t dark:border-slate-800">
-                <td className="py-2">{it.productName}</td>
-                <td className="py-2">{it.quantity}</td>
-                <td className="py-2">R$ {it.total}</td>
+        <div className="surface mt-6 overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-stone-200 text-left text-muted dark:border-stone-700">
+                <th className="px-4 py-3 font-medium">Produto</th>
+                <th className="px-4 py-3 font-medium">Quantidade</th>
+                <th className="px-4 py-3 font-medium">Total</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {items.map((it) => (
+                <tr key={it.productId} className="border-b border-stone-100 dark:border-stone-800">
+                  <td className="px-4 py-3">{it.productName}</td>
+                  <td className="px-4 py-3">{it.quantity}</td>
+                  <td className="px-4 py-3 font-medium">R$ {it.total}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   )

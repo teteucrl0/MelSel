@@ -1,6 +1,12 @@
-import { useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import authService from '../services/authService'
+import { hasValidLocalSession } from '../utils/authSession'
+import { formatApiError } from '../utils/apiValidationError'
+import { resolvePostLoginPath } from '../services/authUtil'
+import { MotionPage, StaggerContainer, StaggerItem, AnimatedButton, variants } from '../components/motion/Motion'
+import Logo from '../components/Logo'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -9,55 +15,118 @@ export default function Login() {
   const navigate = useNavigate()
   const location = useLocation()
   const from = location.state?.from?.pathname || '/'
+  const sessionExpired = Boolean(location.state?.sessionExpired)
+  const registerMessage = location.state?.message
+
+  useEffect(() => {
+    if (sessionExpired) {
+      setError('Sessão expirada. Entre novamente com seu e-mail e senha.')
+    } else if (registerMessage) {
+      setError('')
+    }
+  }, [sessionExpired, registerMessage])
+
+  useEffect(() => {
+    if (!hasValidLocalSession()) return
+    navigate(resolvePostLoginPath(null, from), { replace: true })
+  }, [from, navigate])
 
   const submit = async (e) => {
     e.preventDefault()
     try {
-      await authService.login(email, password)
-      navigate(from, { replace: true })
+      const session = await authService.login(email, password)
+      navigate(resolvePostLoginPath(session, from), { replace: true })
     } catch (err) {
-      console.error(err)
-      setError('Falha no login')
+      const status = err?.response?.status
+      if (status === 401 || status === 400) {
+        setError('E-mail ou senha incorretos.')
+      } else {
+        setError(formatApiError(err, 'Não foi possível entrar. Tente novamente.'))
+      }
     }
   }
 
   return (
-    <div className="mx-auto max-w-md rounded-lg border-2 border-amber-200 bg-white p-6 shadow-md dark:border-slate-800 dark:bg-slate-900">
-      <h2 className="font-serif text-2xl font-bold text-amber-900 dark:text-slate-100">Entrar</h2>
-      <p className="mt-1 text-sm text-amber-700 dark:text-slate-400">Bem-vindo de volta à fazenda!</p>
-      
-      {error && <div className="mt-4 rounded-md border-2 border-red-300 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-400">{error}</div>}
-      
-      <form onSubmit={submit} className="mt-4 space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-amber-800 dark:text-slate-300">Email</label>
-          <input 
-            className="mt-1 w-full rounded-md border-2 border-amber-300 bg-white p-2 text-amber-900 placeholder-amber-400 focus:border-amber-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-amber-500" 
-            placeholder="seu@email.com" 
-            type="email"
-            value={email} 
-            onChange={e => setEmail(e.target.value)} 
-            required
-          />
+    <MotionPage className="mx-auto max-w-md">
+      <div className="mb-6 flex justify-center">
+        <motion.div whileHover={{ rotate: 2, scale: 1.02 }} className="flex items-center gap-3">
+          <Logo className="h-10 w-10" />
+          <div>
+            <div className="text-xl font-semibold tracking-tight">MelSell</div>
+            <div className="text-[10px] -mt-1 text-muted">direto do produtor</div>
+          </div>
+        </motion.div>
+      </div>
+
+      <div className="surface-elevated p-8">
+        <h1 className="page-title text-2xl">Entrar na sua conta</h1>
+        <p className="mt-2 text-sm text-muted">Compre mel artesanal ou gerencie sua produção.</p>
+
+        {registerMessage && (
+          <div className="alert mt-6" style={{ borderColor: 'rgba(52, 211, 153, 0.35)', background: 'rgba(52, 211, 153, 0.1)', color: 'var(--shop-success, #34d399)' }}>
+            {registerMessage}
+          </div>
+        )}
+        {error && <div className="alert alert-error mt-6">{error}</div>}
+
+        <form onSubmit={submit}>
+          <StaggerContainer className="mt-6 space-y-4">
+            <StaggerItem>
+              <div>
+                <label className="label" htmlFor="email">E-mail</label>
+                <input
+                  id="email"
+                  className="input-field"
+                  type="email"
+                  placeholder="voce@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+            </StaggerItem>
+            <StaggerItem>
+              <div>
+                <label className="label" htmlFor="password">Senha</label>
+                <input
+                  id="password"
+                  className="input-field"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+            </StaggerItem>
+            <StaggerItem>
+              <AnimatedButton
+                type="submit"
+                className="btn-primary w-full py-2.5"
+              >
+                Entrar
+              </AnimatedButton>
+            </StaggerItem>
+          </StaggerContainer>
+        </form>
+
+        <div className="mt-6 space-y-3 text-center text-sm text-muted">
+          <p>Não tem conta?</p>
+          <div className="shop-login-register-links">
+            <Link to="/register" className="shop-login-register-chip">
+              Quero comprar
+            </Link>
+            <Link to="/register?tipo=apicultor" className="shop-login-register-chip shop-login-register-chip--vendor">
+              Sou apicultor / fornecedor
+            </Link>
+          </div>
         </div>
-        <div>
-          <label className="block text-sm font-medium text-amber-800 dark:text-slate-300">Senha</label>
-          <input 
-            className="mt-1 w-full rounded-md border-2 border-amber-300 bg-white p-2 text-amber-900 placeholder-amber-400 focus:border-amber-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-amber-500" 
-            placeholder="Sua senha" 
-            type="password" 
-            value={password} 
-            onChange={e => setPassword(e.target.value)} 
-            required
-          />
-        </div>
-        <button type="submit" className="w-full rounded-md bg-amber-500 px-4 py-2 font-semibold text-white transition hover:bg-amber-600">
-          Entrar
-        </button>
-      </form>
-      <p className="mt-4 text-center text-sm text-amber-700 dark:text-slate-400">
-        Não tem conta? <a href="/register" className="font-semibold text-amber-600 hover:underline dark:text-amber-400">Registre-se</a>
-      </p>
-    </div>
+      </div>
+
+      {import.meta.env.DEV && (
+        <p className="mt-4 text-center text-[11px] text-muted">
+          Conta de teste (dev): admin@example.com / admin123
+        </p>
+      )}
+    </MotionPage>
   )
 }

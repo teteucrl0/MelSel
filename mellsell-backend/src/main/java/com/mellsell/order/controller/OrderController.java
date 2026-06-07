@@ -4,6 +4,7 @@ import com.mellsell.auth.entity.User;
 import com.mellsell.auth.exception.ResourceNotFoundException;
 import com.mellsell.auth.service.UserService;
 import com.mellsell.order.dto.OrderResponseDTO;
+import com.mellsell.order.dto.TrackingResponseDTO;
 import com.mellsell.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,15 +26,21 @@ public class OrderController {
         return userService.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
     }
 
-    @PreAuthorize("hasRole('CLIENTE')")
+    @PreAuthorize("isAuthenticated()")
     @GetMapping
     public List<OrderResponseDTO> listOrders() {
         return orderService.listOrders(currentUser());
     }
 
-    @PreAuthorize("hasRole('CLIENTE')")
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/{id}")
     public OrderResponseDTO getOrder(@PathVariable Long id) {
         return orderService.getOrder(currentUser(), id);
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/{id}/tracking")
+    public TrackingResponseDTO getTracking(@PathVariable Long id) {
+        return orderService.getTracking(currentUser(), id);
     }
 }

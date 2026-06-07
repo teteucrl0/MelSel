@@ -42,6 +42,24 @@ public class Order {
 
     private String shippingAddress;
 
+    @Column(name = "supplier_id")
+    private Long supplierId;
+
+    @Column(name = "supplier_name", length = 120)
+    private String supplierName;
+
+    @Column(length = 20)
+    private String trackingCode;
+
+    @Column(length = 40)
+    @Builder.Default
+    private String carrier = "Correios";
+
+    /** Etapas concluídas na timeline (0–5), usado no modo ao vivo para apresentação. */
+    @Column(name = "tracking_steps_completed", nullable = false)
+    @Builder.Default
+    private Integer trackingStepsCompleted = 0;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<OrderItem> items = new ArrayList<>();

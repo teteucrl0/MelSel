@@ -31,7 +31,7 @@ public class AdminProductController {
         return ResponseEntity.created(URI.create("/api/admin/products/" + created.getId())).body(created);
     }
 
-    @PreAuthorize("hasRole('VENDEDOR')")
+    @PreAuthorize("hasAnyRole('VENDEDOR','ADMIN')")
     @GetMapping("/my")
     public ResponseEntity<Page<ProductResponseDTO>> listMyProducts(
             @RequestParam(name = "page", defaultValue = "0") int page,

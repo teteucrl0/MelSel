@@ -25,6 +25,12 @@ public class OrderItem {
     @Column(nullable = false)
     private Long productId;
 
+    @Column(name = "supplier_id")
+    private Long supplierId;
+
+    @Column(name = "supplier_name", length = 120)
+    private String supplierName;
+
     @Column(nullable = false)
     private String productName;
 

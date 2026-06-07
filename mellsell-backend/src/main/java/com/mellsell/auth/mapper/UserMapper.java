@@ -15,11 +15,17 @@ public class UserMapper {
                 .id(u.getId())
                 .name(u.getName())
                 .email(u.getEmail())
+                .username(u.getUsername())
+                .avatarUrl(u.getAvatarUrl())
+                .storeName(u.getStoreName())
+                .age(u.getAge())
+                .birthDate(u.getBirthDate())
                 .active(u.getActive())
                 .locked(u.getLocked())
                 .failedLoginAttempts(u.getFailedLoginAttempts())
                 .roles(u.getRoles() == null ? java.util.Set.of() : u.getRoles().stream().map(Enum::name).collect(Collectors.toSet()))
                 .createdAt(u.getCreatedAt())
+                .lastLogin(u.getLastLogin())
                 .build();
     }
 }

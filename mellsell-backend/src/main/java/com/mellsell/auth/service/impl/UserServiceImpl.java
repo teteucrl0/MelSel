@@ -1,5 +1,6 @@
 package com.mellsell.auth.service.impl;
 
+import com.mellsell.auth.dto.AdminUpdateUserDTO;
 import com.mellsell.auth.dto.AdminUserResponseDTO;
 import com.mellsell.auth.dto.RegisterRequest;
 import com.mellsell.auth.entity.Role;
@@ -10,7 +11,9 @@ import com.mellsell.auth.repository.UserRepository;
 import com.mellsell.auth.service.UserService;
 import com.mellsell.catalog.entity.Supplier;
 import com.mellsell.catalog.repository.SupplierRepository;
+import com.mellsell.common.util.InputSanitizer;
 import com.mellsell.common.util.ValidatorUtil;
+import com.mellsell.realtime.ApiaryOnboardingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,9 +39,11 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final SupplierRepository supplierRepository;
+    private final ApiaryOnboardingService apiaryOnboardingService;
 
     @Override
     public User registerClient(RegisterRequest req) {
+        sanitizeRegisterRequest(req);
         if (userRepository.existsByEmail(req.getEmail())) {
             throw new IllegalArgumentException("Email já cadastrado");
         }
@@ -61,6 +66,7 @@ public class UserServiceImpl implements UserService {
                 .email(req.getEmail())
                 .password(passwordEncoder.encode(req.getPassword()))
                 .age(age)
+                .birthDate(req.getBirthDate())
                 .active(true)
                 .locked(false)
                 .failedLoginAttempts(0)
@@ -71,6 +77,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User registerVendor(RegisterRequest req) {
+        sanitizeRegisterRequest(req);
+        String store = req.getStoreName();
+        if (store == null || store.isBlank()) {
+            throw new IllegalArgumentException("Informe o nome da sua loja ou apiário");
+        }
+        if (store.trim().length() < 3) {
+            throw new IllegalArgumentException("Nome da loja deve ter pelo menos 3 caracteres");
+        }
+        String supplierDescription = InputSanitizer.requireSafeSupplierDescription(req.getSupplierDescription());
+        String supplierCity = InputSanitizer.requireSafeSupplierCity(req.getSupplierCity());
+        String supplierState = InputSanitizer.requireSafeSupplierState(req.getSupplierState());
+        req.setSupplierDescription(supplierDescription);
+        req.setSupplierCity(supplierCity);
+        req.setSupplierState(supplierState);
         if (userRepository.existsByEmail(req.getEmail())) {
             throw new IllegalArgumentException("Email já cadastrado");
         }
@@ -93,6 +113,7 @@ public class UserServiceImpl implements UserService {
                 .email(req.getEmail())
                 .password(passwordEncoder.encode(req.getPassword()))
                 .age(age)
+                .birthDate(req.getBirthDate())
                 .storeName(req.getStoreName())
                 .active(true)
                 .locked(false)
@@ -101,13 +122,23 @@ public class UserServiceImpl implements UserService {
                 .build();
         u = userRepository.save(u);
 
+        String supplierLabel = req.getStoreName() != null && !req.getStoreName().isBlank()
+                ? req.getStoreName().trim()
+                : u.getName();
         Supplier s = Supplier.builder()
-                .name(u.getName())
+                .name(supplierLabel)
                 .email(u.getEmail())
-                .active(true)
+                .active(false)
+                .description(supplierDescription)
+                .city(supplierCity)
+                .state(supplierState)
                 .owner(u)
                 .build();
-        supplierRepository.save(s);
+        Supplier savedSupplier = supplierRepository.save(s);
+        String storeLabel = req.getStoreName() != null && !req.getStoreName().isBlank()
+                ? req.getStoreName()
+                : savedSupplier.getName();
+        apiaryOnboardingService.broadcastVendorOnboarding(u.getName(), storeLabel);
 
         return u;
     }
@@ -157,7 +188,14 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public Page<AdminUserResponseDTO> listUsers(Pageable pageable) {
-        Page<User> page = userRepository.findAll(pageable);
+        return listUsers(null, null, pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<AdminUserResponseDTO> listUsers(String q, Role role, Pageable pageable) {
+        String query = q != null && !q.isBlank() ? q.trim() : null;
+        Page<User> page = userRepository.findFiltered(query, role, pageable);
         return page.map(userMapper::toDto);
     }
 
@@ -182,7 +220,32 @@ public class UserServiceImpl implements UserService {
     @Override
     public AdminUserResponseDTO setActive(Long id, Boolean active) {
         User u = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
+        if (Boolean.FALSE.equals(active) && u.getRoles().contains(Role.ADMIN)) {
+            long activeAdmins = userRepository.findByRole(Role.ADMIN).stream()
+                    .filter(user -> Boolean.TRUE.equals(user.getActive()))
+                    .count();
+            if (activeAdmins <= 1) {
+                throw new IllegalArgumentException("Não é possível desativar o único administrador ativo");
+            }
+        }
         u.setActive(active);
+        u = userRepository.save(u);
+        return userMapper.toDto(u);
+    }
+
+    @Override
+    public AdminUserResponseDTO adminUpdateUser(Long id, AdminUpdateUserDTO dto, Long actingUserId) {
+        User u = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
+        u.setName(InputSanitizer.requireSafeName(dto.getName()));
+        if (u.getRoles().contains(Role.VENDEDOR)) {
+            String store = InputSanitizer.safeStoreName(dto.getStoreName());
+            u.setStoreName(store);
+            final String supplierLabel = store == null ? u.getName() : store;
+            supplierRepository.findByOwnerId(u.getId()).ifPresent(supplier -> {
+                supplier.setName(supplierLabel);
+                supplierRepository.save(supplier);
+            });
+        }
         u = userRepository.save(u);
         return userMapper.toDto(u);
     }
@@ -211,6 +274,12 @@ public class UserServiceImpl implements UserService {
                 !user.getLocked(),
                 authorities
         );
+    }
+
+    private void sanitizeRegisterRequest(RegisterRequest req) {
+        req.setName(InputSanitizer.requireSafeName(req.getName()));
+        req.setEmail(InputSanitizer.normalizeEmail(req.getEmail()));
+        req.setStoreName(InputSanitizer.safeStoreName(req.getStoreName()));
     }
 
     private String extractFirstName(String fullName) {

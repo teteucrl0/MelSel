@@ -5,6 +5,10 @@ import com.mellsell.auth.exception.ResourceNotFoundException;
 import com.mellsell.auth.service.UserService;
 import com.mellsell.catalog.dto.CouponDTO;
 import com.mellsell.catalog.dto.PromotionDTO;
+import com.mellsell.catalog.dto.ProductImageUploadResponse;
+import com.mellsell.catalog.dto.VendorDashboardStatsDTO;
+import com.mellsell.catalog.service.ProductImageStorageService;
+import com.mellsell.catalog.service.VendorDashboardService;
 import com.mellsell.catalog.entity.Coupon;
 import com.mellsell.catalog.entity.Promotion;
 import com.mellsell.catalog.entity.Supplier;
@@ -17,6 +21,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,6 +37,8 @@ public class VendorController {
     private final SupplierRepository supplierRepository;
     private final ProductRepository productRepository;
     private final UserService userService;
+    private final VendorDashboardService vendorDashboardService;
+    private final ProductImageStorageService productImageStorageService;
 
     private User currentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -42,11 +50,31 @@ public class VendorController {
         return supplierRepository.findByOwnerId(user.getId()).orElseThrow(() -> new ResourceNotFoundException("Fornecedor não encontrado"));
     }
 
+    @PreAuthorize("hasAnyRole('VENDEDOR','ADMIN')")
+    @PostMapping("/upload/product-image")
+    public ProductImageUploadResponse uploadProductImage(@RequestParam("file") MultipartFile file) {
+        String imageUrl = productImageStorageService.store(file);
+        return ProductImageUploadResponse.builder().imageUrl(imageUrl).build();
+    }
+
+    @PreAuthorize("hasRole('VENDEDOR')")
+    @GetMapping("/dashboard/stats")
+    public VendorDashboardStatsDTO dashboardStats() {
+        return vendorDashboardService.buildStats(currentSupplier());
+    }
+
     @PreAuthorize("hasRole('VENDEDOR')")
     @PostMapping("/coupons")
     public CouponDTO createCoupon(@Valid @RequestBody CouponDTO dto) {
+        String code = dto.getCode().trim().toUpperCase();
+        if (dto.getValidUntil().isBefore(dto.getValidFrom()) || dto.getValidUntil().isEqual(dto.getValidFrom())) {
+            throw new IllegalArgumentException("A data final deve ser posterior à data inicial.");
+        }
+        if (couponRepository.findByCode(code).isPresent()) {
+            throw new IllegalArgumentException("Já existe um cupom com este código. Escolha outro.");
+        }
         Coupon coupon = Coupon.builder()
-                .code(dto.getCode().toUpperCase())
+                .code(code)
                 .supplier(currentSupplier())
                 .discountPercentage(dto.getDiscountPercentage())
                 .maxUses(dto.getMaxUses())

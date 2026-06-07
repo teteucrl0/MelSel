@@ -1,6 +1,16 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import api from '../services/api'
 import AnimatedInput from '../components/AnimatedInput'
+import PageHeader from '../components/PageHeader'
+import { formatApiError } from '../utils/apiValidationError'
+
+function toApiDateTime(localValue) {
+  if (!localValue) return null
+  const normalized = localValue.length === 16 ? `${localValue}:00` : localValue
+  const parsed = new Date(normalized)
+  if (Number.isNaN(parsed.getTime())) return null
+  return parsed.toISOString()
+}
 
 export default function VendorCoupons() {
   const [coupons, setCoupons] = useState([])
@@ -9,7 +19,7 @@ export default function VendorCoupons() {
     discountPercentage: '',
     maxUses: '',
     validFrom: '',
-    validUntil: ''
+    validUntil: '',
   })
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState('')
@@ -24,12 +34,12 @@ export default function VendorCoupons() {
       const response = await api.get('/api/vendor/coupons')
       setCoupons(response.data || [])
     } catch (err) {
-      console.error('Erro ao carregar cupons:', err)
+      console.error(err)
     }
   }
 
   const handleChange = (field, value) => {
-    setForm(prev => ({ ...prev, [field]: value }))
+    setForm((prev) => ({ ...prev, [field]: value }))
     setError('')
   }
 
@@ -39,88 +49,96 @@ export default function VendorCoupons() {
     setSuccess('')
 
     if (!form.code || !form.discountPercentage || !form.maxUses || !form.validFrom || !form.validUntil) {
-      setError('Preencha todos os campos')
+      setError('Preencha todos os campos.')
+      return
+    }
+
+    const discount = parseFloat(form.discountPercentage)
+    const maxUses = parseInt(form.maxUses, 10)
+    const validFrom = toApiDateTime(form.validFrom)
+    const validUntil = toApiDateTime(form.validUntil)
+
+    if (!Number.isFinite(discount) || discount <= 0 || discount > 100) {
+      setError('Informe um desconto entre 0,01% e 100%.')
+      return
+    }
+    if (!Number.isFinite(maxUses) || maxUses < 1) {
+      setError('Máximo de usos deve ser pelo menos 1.')
+      return
+    }
+    if (!validFrom || !validUntil) {
+      setError('Datas de validade inválidas.')
+      return
+    }
+    if (new Date(validUntil) <= new Date(validFrom)) {
+      setError('A data final deve ser posterior à data inicial.')
       return
     }
 
     try {
       setLoading(true)
       await api.post('/api/vendor/coupons', {
-        code: form.code.toUpperCase(),
-        discountPercentage: parseFloat(form.discountPercentage),
-        maxUses: parseInt(form.maxUses),
-        validFrom: new Date(form.validFrom).toISOString(),
-        validUntil: new Date(form.validUntil).toISOString()
+        code: form.code.trim().toUpperCase(),
+        discountPercentage: discount,
+        maxUses,
+        validFrom,
+        validUntil,
       })
-      setSuccess('✓ Cupom criado com sucesso!')
-      setForm({
-        code: '',
-        discountPercentage: '',
-        maxUses: '',
-        validFrom: '',
-        validUntil: ''
-      })
+      setSuccess('Cupom criado com sucesso.')
+      setForm({ code: '', discountPercentage: '', maxUses: '', validFrom: '', validUntil: '' })
       await loadCoupons()
     } catch (err) {
-      setError(err.response?.data?.message || 'Erro ao criar cupom')
+      setError(formatApiError(err, 'Erro ao criar cupom.'))
     } finally {
       setLoading(false)
     }
   }
 
   const deleteCoupon = async (id) => {
-    if (!window.confirm('Tem certeza que deseja deletar este cupom?')) return
+    if (!window.confirm('Excluir este cupom?')) return
     try {
       await api.delete(`/api/vendor/coupons/${id}`)
-      setSuccess('✓ Cupom deletado')
+      setSuccess('Cupom excluído.')
       await loadCoupons()
     } catch (err) {
-      setError('Erro ao deletar cupom')
+      setError(formatApiError(err, 'Erro ao excluir cupom.'))
     }
   }
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <h1 className="text-4xl font-bold text-amber-900 dark:text-slate-100 mb-8">💰 Gerenciar Cupons</h1>
+    <div className="fade-in max-w-6xl">
+      <PageHeader title="Cupons" description="Crie códigos de desconto para seus clientes." />
 
-      <div className="grid md:grid-cols-2 gap-8">
-        {/* Formulário */}
-        <div className="bg-white dark:bg-gradient-to-br dark:from-slate-800 dark:to-slate-900 p-8 rounded-lg shadow-lg border border-amber-200 dark:border-slate-700 hover:border-amber-500 dark:hover:border-yellow-500/50 transition-all duration-300">
-          <h2 className="text-2xl font-bold text-amber-900 dark:text-slate-100 mb-6">Criar Novo Cupom</h2>
-
-          {success && <div className="bg-green-100 dark:bg-green-900/30 border border-green-500 text-green-700 dark:text-green-400 p-4 rounded mb-4 text-sm">{success}</div>}
-          {error && <div className="bg-red-100 dark:bg-red-900/30 border border-red-500 text-red-700 dark:text-red-400 p-4 rounded mb-4 text-sm">{error}</div>}
+      <div className="grid gap-8 lg:grid-cols-2">
+        <div className="surface p-6 sm:p-8">
+          <h2 className="section-title mb-6">Novo cupom</h2>
+          {success && <div className="alert alert-success mb-4">{success}</div>}
+          {error && <div className="alert alert-error mb-4">{error}</div>}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <AnimatedInput
-              label="Código do Cupom"
+              label="Código"
               value={form.code}
               onChange={(e) => handleChange('code', e.target.value.toUpperCase())}
-              placeholder="EX: BLACKFRIDAY"
               required
             />
-
             <AnimatedInput
               label="Desconto (%)"
               type="number"
               value={form.discountPercentage}
               onChange={(e) => handleChange('discountPercentage', e.target.value)}
-              placeholder="10"
               required
               min="0"
               max="100"
             />
-
             <AnimatedInput
-              label="Máximo de Usos"
+              label="Máximo de usos"
               type="number"
               value={form.maxUses}
               onChange={(e) => handleChange('maxUses', e.target.value)}
-              placeholder="100"
               required
               min="1"
             />
-
             <AnimatedInput
               label="Válido de"
               type="datetime-local"
@@ -128,7 +146,6 @@ export default function VendorCoupons() {
               onChange={(e) => handleChange('validFrom', e.target.value)}
               required
             />
-
             <AnimatedInput
               label="Válido até"
               type="datetime-local"
@@ -136,54 +153,37 @@ export default function VendorCoupons() {
               onChange={(e) => handleChange('validUntil', e.target.value)}
               required
             />
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 dark:from-yellow-500 dark:to-yellow-600 dark:hover:from-yellow-600 dark:hover:to-yellow-700 disabled:opacity-50 text-white font-bold py-3 rounded-lg transition-all duration-300 transform hover:scale-105"
-            >
-              {loading ? '⏳ Criando...' : '✓ Criar Cupom'}
+            <button type="submit" disabled={loading} className="btn-primary mt-4 w-full py-2.5">
+              {loading ? 'Salvando...' : 'Criar cupom'}
             </button>
           </form>
         </div>
 
-        {/* Lista de Cupons */}
-        <div className="bg-white dark:bg-gradient-to-br dark:from-slate-800 dark:to-slate-900 p-8 rounded-lg shadow-lg border border-amber-200 dark:border-slate-700">
-          <h2 className="text-2xl font-bold text-amber-900 dark:text-slate-100 mb-6">Meus Cupons ({coupons.length})</h2>
-
+        <div className="surface p-6 sm:p-8">
+          <h2 className="section-title mb-6">Cupons ativos ({coupons.length})</h2>
           {coupons.length === 0 ? (
-            <div className="text-center py-8 text-amber-700 dark:text-slate-400">
-              <div className="text-4xl mb-2">🎫</div>
-              <p>Nenhum cupom criado ainda</p>
-            </div>
+            <p className="text-sm text-muted">Nenhum cupom cadastrado.</p>
           ) : (
-            <div className="space-y-3 max-h-96 overflow-y-auto">
-              {coupons.map(coupon => (
-                <div
-                  key={coupon.id}
-                  className="bg-amber-50 dark:bg-slate-700/50 border border-amber-200 dark:border-slate-600 hover:border-amber-500 dark:hover:border-yellow-400 p-4 rounded-lg transition-all duration-300 transform hover:scale-105"
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="font-bold text-amber-600 dark:text-yellow-400 text-lg">{coupon.code}</div>
-                      <div className="text-sm text-amber-700 dark:text-slate-400 mt-1">
-                        <div>💰 Desconto: {coupon.discountPercentage}%</div>
-                        <div>🔢 Usos: {coupon.usedCount}/{coupon.maxUses}</div>
-                        <div className={`text-xs mt-1 ${coupon.active ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                          {coupon.active ? '✓ Ativo' : '✗ Inativo'}
-                        </div>
-                      </div>
+            <ul className="max-h-[28rem] space-y-3 overflow-y-auto">
+              {coupons.map((coupon) => (
+                <li key={coupon.id} className="rounded-lg border border-stone-200 p-4 dark:border-stone-700">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-bold text-brand-700 dark:text-brand-400">{coupon.code}</p>
+                      <p className="mt-1 text-sm text-muted">
+                        {coupon.discountPercentage}% · {coupon.usedCount}/{coupon.maxUses} usos
+                      </p>
+                      <span className={`badge mt-2 ${coupon.active ? 'badge-success' : 'badge-danger'}`}>
+                        {coupon.active ? 'Ativo' : 'Inativo'}
+                      </span>
                     </div>
-                    <button
-                      onClick={() => deleteCoupon(coupon.id)}
-                      className="text-red-600 dark:text-red-400 hover:text-red-500 dark:hover:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/20 px-2 py-1 rounded transition-all"
-                    >
-                      🗑️
+                    <button type="button" onClick={() => deleteCoupon(coupon.id)} className="btn-ghost text-red-600 dark:text-red-400">
+                      Excluir
                     </button>
                   </div>
-                </div>
+                </li>
               ))}
-            </div>
+            </ul>
           )}
         </div>
       </div>

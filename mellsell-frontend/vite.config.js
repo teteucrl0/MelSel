@@ -5,4 +5,17 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  server: {
+    host: true,
+    port: 5173,
+    strictPort: true,
+    hmr: {
+      overlay: true,
+    },
+    proxy: {
+      '/api': { target: 'http://127.0.0.1:8080', changeOrigin: true },
+      '/uploads': { target: 'http://127.0.0.1:8080', changeOrigin: true },
+      '/ws': { target: 'http://127.0.0.1:8080', ws: true, changeOrigin: true },
+    },
+  },
 })

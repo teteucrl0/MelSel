@@ -1,0 +1,25 @@
+# MySQL 8 para MelSell — use: podman compose -f docker-compose.mysql.yml up -d
+services:
+  mysql:
+    image: docker.io/library/mysql:8.0
+    container_name: mellsell-mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mellsell
+      MYSQL_USER: mellsell
+      MYSQL_PASSWORD: mellsell
+    volumes:
+      - mellsell_mysql_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 25s
+
+volumes:
+  mellsell_mysql_data:

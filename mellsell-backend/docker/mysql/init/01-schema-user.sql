@@ -1,0 +1,4 @@
+CREATE DATABASE IF NOT EXISTS mellsell CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER IF NOT EXISTS 'mellsell'@'%' IDENTIFIED BY 'mellsell';
+GRANT ALL PRIVILEGES ON mellsell.* TO 'mellsell'@'%';
+FLUSH PRIVILEGES;

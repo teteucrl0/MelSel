@@ -1,239 +1,408 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import authService from '../services/authService'
+import ApiarySetupLive from '../components/ApiarySetupLive'
+import BirthDateInput from '../components/BirthDateInput'
+import AccountTypePicker from '../components/AccountTypePicker'
+import VendorRegisterPanel from '../components/VendorRegisterPanel'
+import { motion } from 'framer-motion'
+import { MotionPage } from '../components/motion/Motion'
+import Logo from '../components/Logo'
+import { brDateToIso, getBirthDateValidationError, isValidBrBirthDate } from '../utils/birthDateBr'
+import { getFullNameError, isValidFullName, normalizeFullName } from '../utils/fullName'
+import {
+  getVendorCityError,
+  getVendorDescriptionError,
+  getVendorStateError,
+  getVendorStoreNameError,
+  stripMarkupChars,
+} from '../utils/inputSanitizer'
+import { resolvePostLoginPath } from '../services/authUtil'
+
+const FIELD_LABELS = {
+  name: 'Nome',
+  email: 'E-mail',
+  password: 'Senha',
+  birthDate: 'Data de nascimento',
+  storeName: 'Nome da loja',
+  supplierDescription: 'Descrição da loja',
+  supplierCity: 'Cidade',
+  supplierState: 'UF',
+}
+
+function parseRegisterError(err) {
+  const data = err?.response?.data
+  if (!data) return 'Não foi possível conectar ao servidor. Tente novamente.'
+
+  if (Array.isArray(data.errors) && data.errors.length > 0) {
+    return data.errors
+      .map((e) => {
+        const label = FIELD_LABELS[e.field] || e.field
+        return `${label}: ${e.message}`
+      })
+      .join(' · ')
+  }
+
+  if (data.message && data.message !== 'Validation failed') {
+    return data.message
+  }
+
+  if (data.message === 'Validation failed') {
+    return 'Verifique os campos destacados e tente novamente.'
+  }
+
+  return 'Erro ao registrar. Verifique os dados e tente novamente.'
+}
+
+function initialRoleFromSearch(searchParams) {
+  const tipo = (searchParams.get('tipo') || searchParams.get('role') || '').toLowerCase()
+  if (tipo === 'apicultor' || tipo === 'vendedor' || tipo === 'fornecedor' || tipo === 'vendor') {
+    return 'VENDEDOR'
+  }
+  return 'CLIENTE'
+}
 
 export default function Register() {
+  const [searchParams] = useSearchParams()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [birthDate, setBirthDate] = useState('')
   const [password, setPassword] = useState('')
-  const [role, setRole] = useState('CLIENTE')
+  const [role, setRole] = useState(() => initialRoleFromSearch(searchParams))
   const [storeName, setStoreName] = useState('')
+  const [storeError, setStoreError] = useState('')
+  const [supplierDescription, setSupplierDescription] = useState('')
+  const [descriptionError, setDescriptionError] = useState('')
+  const [supplierCity, setSupplierCity] = useState('')
+  const [cityError, setCityError] = useState('')
+  const [supplierState, setSupplierState] = useState('')
+  const [stateError, setStateError] = useState('')
   const [error, setError] = useState('')
+  const [nameError, setNameError] = useState('')
+  const [birthDateError, setBirthDateError] = useState('')
   const [passwordStrength, setPasswordStrength] = useState(0)
+  const [submitting, setSubmitting] = useState(false)
+  const [apiaryLive, setApiaryLive] = useState(false)
   const navigate = useNavigate()
 
-  const getPasswordRequirements = (pwd) => {
-    return {
-      length: pwd.length >= 8,
-      lower: /[a-z]/.test(pwd),
-      upper: /[A-Z]/.test(pwd),
-      digit: /\d/.test(pwd),
-      special: /[@$!%*?&]/.test(pwd)
-    }
-  }
+  useEffect(() => {
+    setRole(initialRoleFromSearch(searchParams))
+  }, [searchParams])
+
+  const getPasswordRequirements = (pwd) => ({
+    length: pwd.length >= 8,
+    lower: /[a-z]/.test(pwd),
+    upper: /[A-Z]/.test(pwd),
+    digit: /\d/.test(pwd),
+    special: /[^A-Za-z0-9]/.test(pwd),
+  })
 
   const checkPasswordStrength = (pwd) => {
     if (!pwd) {
       setPasswordStrength(0)
       return
     }
-    const reqs = getPasswordRequirements(pwd)
-    const strength = Object.values(reqs).filter(Boolean).length
-    setPasswordStrength(strength)
+    setPasswordStrength(Object.values(getPasswordRequirements(pwd)).filter(Boolean).length)
   }
 
-  const isPasswordValid = (pwd) => {
-    const reqs = getPasswordRequirements(pwd)
-    return Object.values(reqs).every(Boolean)
-  }
+  const isPasswordValid = (pwd) => Object.values(getPasswordRequirements(pwd)).every(Boolean)
 
-  const calculateAge = (date) => {
+  const calculateAge = (isoDate) => {
     const today = new Date()
-    const birthDay = new Date(date)
+    const birthDay = new Date(isoDate)
     let age = today.getFullYear() - birthDay.getFullYear()
     const monthDiff = today.getMonth() - birthDay.getMonth()
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDay.getDate())) {
-      age--
-    }
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDay.getDate())) age--
     return age
   }
 
   const validateInputs = () => {
+    setBirthDateError('')
+    setNameError('')
+    setStoreError('')
+    setDescriptionError('')
+    setCityError('')
+    setStateError('')
     if (!name || !email || !birthDate || !password) {
-      setError('Todos os campos são obrigatórios')
+      setError('Todos os campos são obrigatórios.')
       return false
     }
-    
-    const age = calculateAge(birthDate)
-    if (age < 18) {
-      setError('Você deve ter no mínimo 18 anos para se registrar')
+    const nameErr = getFullNameError(name)
+    if (nameErr || !isValidFullName(name)) {
+      setNameError(nameErr || 'Informe nome e sobrenome.')
+      setError(nameErr || 'Informe nome e sobrenome.')
       return false
     }
-    
+    const dateErr = getBirthDateValidationError(birthDate)
+    if (dateErr || !isValidBrBirthDate(birthDate)) {
+      const msg = dateErr || 'Data de nascimento inválida. Use o formato dd/mm/aaaa.'
+      setBirthDateError(msg)
+      setError(msg)
+      return false
+    }
+    if (role === 'VENDEDOR') {
+      const storeErr = getVendorStoreNameError(storeName)
+      if (storeErr) {
+        setStoreError(storeErr)
+        setError(storeErr)
+        return false
+      }
+      const descErr = getVendorDescriptionError(supplierDescription)
+      if (descErr) {
+        setDescriptionError(descErr)
+        setError(descErr)
+        return false
+      }
+      const cityErr = getVendorCityError(supplierCity)
+      if (cityErr) {
+        setCityError(cityErr)
+        setError(cityErr)
+        return false
+      }
+      const uf = supplierState.trim().toUpperCase()
+      const stateErr = getVendorStateError(uf)
+      if (stateErr) {
+        setStateError(stateErr)
+        setError(stateErr)
+        return false
+      }
+    }
+    const birthIso = brDateToIso(birthDate)
+    if (calculateAge(birthIso) < 18) {
+      setError('É necessário ter no mínimo 18 anos.')
+      return false
+    }
     if (!isPasswordValid(password)) {
-      setError('Senha inválida. Verifique os requisitos abaixo')
+      setError('A senha não atende aos requisitos de segurança.')
       return false
     }
-    
     return true
   }
 
   const submit = async (e) => {
     e.preventDefault()
     setError('')
-    
     if (!validateInputs()) return
-    
+    setSubmitting(true)
+    const birthIso = brDateToIso(birthDate)
+    if (!birthIso) {
+      setBirthDateError('Data de nascimento inválida.')
+      setError('Data de nascimento inválida.')
+      setSubmitting(false)
+      return
+    }
     try {
+      const fullName = normalizeFullName(name)
       if (role === 'CLIENTE') {
-        await authService.register(name, email, password, birthDate)
+        await authService.register(fullName, email, password, birthIso)
+        navigate('/login', {
+          state: { message: 'Conta criada! Entre com seu e-mail e senha para comprar.' },
+        })
       } else {
-        await authService.registerVendor(name, email, password, birthDate, storeName)
+        setApiaryLive(true)
+        const session = await authService.registerVendor(fullName, email, password, birthIso, storeName, {
+          supplierDescription: supplierDescription.trim(),
+          supplierCity: supplierCity.trim(),
+          supplierState: supplierState.trim().toUpperCase(),
+        })
+        setTimeout(() => {
+          setApiaryLive(false)
+          if (session?.token) {
+            const pending = session.pendingApproval === true
+            navigate('/vendor/dashboard', {
+              replace: true,
+              state: {
+                welcome: !pending,
+                pendingApproval: pending,
+                message: pending
+                  ? 'Conta criada! Sua loja aguarda aprovação da equipe MelSell. Você já pode acessar o painel.'
+                  : undefined,
+              },
+            })
+          } else {
+            navigate('/login')
+          }
+        }, 5200)
       }
-      navigate('/login')
     } catch (err) {
-      setError(err.response?.data?.message || err.message || 'Erro ao registrar')
+      setApiaryLive(false)
+      setError(parseRegisterError(err))
+    } finally {
+      setSubmitting(false)
     }
   }
 
-  const getPasswordStrengthColor = () => {
-    if (passwordStrength <= 1) return 'bg-red-500'
-    if (passwordStrength <= 2) return 'bg-yellow-500'
-    if (passwordStrength === 3) return 'bg-blue-500'
-    if (passwordStrength === 4) return 'bg-green-500'
-    return 'bg-green-600'
-  }
-
-  const getPasswordStrengthText = () => {
-    const texts = ['', 'Muito fraca', 'Fraca', 'Média', 'Forte', 'Muito forte']
-    return texts[passwordStrength] || ''
-  }
+  const reqs = getPasswordRequirements(password)
+  const isVendor = role === 'VENDEDOR'
 
   return (
-    <div className="mx-auto max-w-md rounded-lg border-2 border-amber-200 bg-white p-6 shadow-md dark:border-slate-800 dark:bg-slate-900">
-      <h2 className="font-serif text-2xl font-bold text-amber-900 dark:text-slate-100">Registrar-se</h2>
-      <p className="mt-1 text-sm text-amber-700 dark:text-slate-400">Junte-se à nossa família!</p>
-      
-      {error && <div className="mt-4 rounded-md border-2 border-red-300 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-400">{error}</div>}
-      
-      <form onSubmit={submit} className="mt-4 space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-amber-800 dark:text-slate-300">Nome</label>
-          <input 
-            className="mt-1 w-full rounded-md border-2 border-amber-300 bg-white p-2 text-amber-900 placeholder-amber-400 focus:border-amber-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-amber-500" 
-            placeholder="Seu nome completo" 
-            value={name} 
-            onChange={e => setName(e.target.value)} 
-            required
-          />
+    <MotionPage className="mx-auto max-w-lg shop-register-page">
+      <div className="mb-5 flex justify-center">
+        <div className="flex items-center gap-3">
+          <Logo className="h-9 w-9" />
+          <div className="text-xl font-semibold tracking-tight" style={{ color: 'var(--shop-text)' }}>
+            Bem-vindo ao MelSell
+          </div>
         </div>
+      </div>
 
-        <div>
-          <label className="block text-sm font-medium text-amber-800 dark:text-slate-300">Email</label>
-          <input 
-            className="mt-1 w-full rounded-md border-2 border-amber-300 bg-white p-2 text-amber-900 placeholder-amber-400 focus:border-amber-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-amber-500" 
-            placeholder="seu@email.com" 
-            type="email"
-            value={email} 
-            onChange={e => setEmail(e.target.value)} 
-            required
-          />
-        </div>
+      <div className="shop-register-card surface-elevated p-6 sm:p-8">
+        <h1 className="page-title text-2xl">Criar sua conta</h1>
+        <p className="mt-2 text-sm text-muted">
+          Escolha se você quer <strong>comprar mel</strong> ou <strong>vender como apicultor</strong>.
+        </p>
 
-        <div>
-          <label className="block text-sm font-medium text-amber-800 dark:text-slate-300">Data de Nascimento</label>
-          <input 
-            className="mt-1 w-full rounded-md border-2 border-amber-300 bg-white p-2 text-amber-900 focus:border-amber-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-amber-500" 
-            type="date"
-            value={birthDate}
-            onChange={e => setBirthDate(e.target.value)}
-            required
-          />
-          <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">É necessário ter no mínimo 18 anos</p>
-        </div>
+        {error && <div className="alert alert-error mt-6">{error}</div>}
 
-        <div>
-          <label className="block text-sm font-medium text-amber-800 dark:text-slate-300">Tipo de Conta</label>
-          <select 
-            className="mt-1 w-full rounded-md border-2 border-amber-300 bg-white p-2 text-amber-900 focus:border-amber-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-amber-500"
-            value={role}
-            onChange={e => setRole(e.target.value)}
-          >
-            <option value="CLIENTE">Cliente</option>
-            <option value="VENDEDOR">Fornecedor/Apicultor</option>
-          </select>
-        </div>
-
-        {role === 'VENDEDOR' && (
+        <form onSubmit={submit} className="mt-6 space-y-5">
           <div>
-            <label className="block text-sm font-medium text-amber-800 dark:text-slate-300">Nome da Loja/Empresa (Opcional)</label>
-            <input 
-              className="mt-1 w-full rounded-md border-2 border-amber-300 bg-white p-2 text-amber-900 placeholder-amber-400 focus:border-amber-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-amber-500" 
-              placeholder="Ex: Mel do Campo, Apicultora Silva" 
-              value={storeName}
-              onChange={e => setStoreName(e.target.value)}
+            <p className="label mb-2">Como você vai usar o MelSell?</p>
+            <AccountTypePicker
+              value={role}
+              disabled={submitting || apiaryLive}
+              onChange={(next) => {
+                setRole(next)
+                setError('')
+                setStoreError('')
+                setDescriptionError('')
+                setCityError('')
+                setStateError('')
+              }}
             />
           </div>
-        )}
 
-        <div>
-          <label className="block text-sm font-medium text-amber-800 dark:text-slate-300">Senha</label>
-          <input 
-            className={`mt-1 w-full rounded-md border-2 p-2 text-amber-900 placeholder-amber-400 focus:outline-none dark:text-slate-100 dark:placeholder-slate-500 ${
-              password && !isPasswordValid(password) ? 'border-red-400' : 'border-amber-300 dark:border-slate-700 dark:bg-slate-800'
-            } ${password && isPasswordValid(password) ? 'border-green-400' : ''}`}
-            placeholder="Mínimo 8 caracteres" 
-            type="password" 
-            value={password} 
-            onChange={e => {
-              setPassword(e.target.value)
-              checkPasswordStrength(e.target.value)
-            }} 
-            required
-          />
-          
-          {password && (
-            <div className="mt-3 space-y-2">
-              <div className="flex items-center justify-between text-xs text-amber-700 dark:text-slate-400">
-                <span>Força: <span className="font-semibold">{getPasswordStrengthText()}</span></span>
-                <span className="font-bold">{passwordStrength}/5</span>
-              </div>
-              
-              <div className="h-2 w-full overflow-hidden rounded-full bg-amber-100 dark:bg-slate-800">
-                <div 
-                  className={`h-2 transition-all ${getPasswordStrengthColor()}`}
-                  style={{width: `${(passwordStrength / 5) * 100}%`}}
-                ></div>
-              </div>
-
-              <div className="rounded-md border border-amber-200 bg-amber-50 p-2 dark:border-slate-700 dark:bg-slate-800">
-                <div className="flex items-center gap-2 text-xs text-amber-700 dark:text-slate-400">
-                  <span>{getPasswordRequirements(password).length ? '✅' : '❌'}</span>
-                  <span>Mínimo 8 caracteres</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-amber-700 dark:text-slate-400">
-                  <span>{getPasswordRequirements(password).lower ? '✅' : '❌'}</span>
-                  <span>Letra minúscula (a-z)</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-amber-700 dark:text-slate-400">
-                  <span>{getPasswordRequirements(password).upper ? '✅' : '❌'}</span>
-                  <span>Letra maiúscula (A-Z)</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-amber-700 dark:text-slate-400">
-                  <span>{getPasswordRequirements(password).digit ? '✅' : '❌'}</span>
-                  <span>Número (0-9)</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-amber-700 dark:text-slate-400">
-                  <span>{getPasswordRequirements(password).special ? '✅' : '❌'}</span>
-                  <span>Caractere especial (@$!%*?&)</span>
-                </div>
-              </div>
-            </div>
+          {isVendor && (
+            <VendorRegisterPanel
+              storeName={storeName}
+              storeError={storeError}
+              description={supplierDescription}
+              descriptionError={descriptionError}
+              city={supplierCity}
+              cityError={cityError}
+              state={supplierState}
+              stateError={stateError}
+              disabled={submitting || apiaryLive}
+              onStoreNameChange={(v) => {
+                const clean = stripMarkupChars(v)
+                setStoreName(clean)
+                if (storeError) setStoreError(getVendorStoreNameError(clean) || '')
+              }}
+              onDescriptionChange={(v) => {
+                const clean = stripMarkupChars(v)
+                setSupplierDescription(clean)
+                if (descriptionError) setDescriptionError(getVendorDescriptionError(clean) || '')
+              }}
+              onCityChange={(v) => {
+                const clean = stripMarkupChars(v)
+                setSupplierCity(clean)
+                if (cityError) setCityError(getVendorCityError(clean) || '')
+              }}
+              onStateChange={(v) => {
+                const clean = stripMarkupChars(v).toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2)
+                setSupplierState(clean)
+                if (stateError) setStateError(getVendorStateError(clean) || '')
+              }}
+            />
           )}
-        </div>
 
-        <button 
-          type="submit"
-          className="w-full rounded-md bg-amber-500 px-4 py-2 font-semibold text-white transition hover:bg-amber-600"
-        >
-          Registrar
-        </button>
-      </form>
+          <div>
+            <label className="label" htmlFor="register-name">
+              Nome completo
+            </label>
+            <input
+              id="register-name"
+              className={`input-field ${nameError ? 'shop-input-invalid' : ''}`}
+              value={name}
+              placeholder="Ex.: Maria Silva Santos"
+              onChange={(e) => {
+                const v = stripMarkupChars(e.target.value)
+                setName(v)
+                if (nameError) setNameError(getFullNameError(v) || '')
+              }}
+              onBlur={() => setNameError(getFullNameError(name) || '')}
+              maxLength={120}
+              required
+              aria-invalid={Boolean(nameError)}
+            />
+            {nameError ? (
+              <p className="shop-field-error">{nameError}</p>
+            ) : (
+              <p className="shop-field-hint">Nome e sobrenome, separados por espaço.</p>
+            )}
+          </div>
+          <div>
+            <label className="label">E-mail</label>
+            <input
+              className="input-field"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <BirthDateInput
+            value={birthDate}
+            onChange={(v) => {
+              setBirthDate(v)
+              if (birthDateError) setBirthDateError(getBirthDateValidationError(v) || '')
+            }}
+            error={birthDateError}
+          />
+          <div>
+            <label className="label">Senha</label>
+            <input
+              className="input-field"
+              type="password"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value)
+                checkPasswordStrength(e.target.value)
+              }}
+              required
+            />
+            {password && (
+              <div className="mt-3 space-y-1.5 rounded-lg border border-stone-200 bg-stone-50 p-3 text-xs dark:border-stone-700 dark:bg-stone-800/50">
+                <p className="font-medium text-muted">Força: {passwordStrength}/5</p>
+                {[
+                  ['length', 'Mínimo 8 caracteres'],
+                  ['lower', 'Letra minúscula'],
+                  ['upper', 'Letra maiúscula'],
+                  ['digit', 'Número'],
+                  ['special', 'Caractere especial (ex.: ! @ # _)'],
+                ].map(([key, label]) => (
+                  <p key={key} className={reqs[key] ? 'text-emerald-700 dark:text-emerald-400' : 'text-muted'}>
+                    {reqs[key] ? '✓' : '·'} {label}
+                  </p>
+                ))}
+              </div>
+            )}
+          </div>
+          <ApiarySetupLive active={apiaryLive} />
 
-      <p className="mt-4 text-center text-sm text-amber-700 dark:text-slate-400">
-        Já tem conta? <a href="/login" className="font-semibold text-amber-600 hover:underline dark:text-amber-400">Faça login</a>
-      </p>
-    </div>
+          <motion.button
+            whileHover={{ scale: 1.005 }}
+            whileTap={{ scale: 0.985 }}
+            type="submit"
+            disabled={submitting || apiaryLive}
+            className="btn-primary w-full py-2.5"
+          >
+            {submitting
+              ? 'Criando conta…'
+              : apiaryLive
+                ? 'Configurando apiário…'
+                : isVendor
+                  ? 'Criar loja de apicultor'
+                  : 'Criar conta de comprador'}
+          </motion.button>
+        </form>
+
+        <p className="mt-6 text-center text-sm text-muted">
+          Já tem conta?{' '}
+          <Link to="/login" className="font-semibold text-brand-700 hover:underline dark:text-brand-400">
+            Entrar
+          </Link>
+        </p>
+      </div>
+    </MotionPage>
   )
 }

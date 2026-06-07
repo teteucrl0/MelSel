@@ -1,0 +1,3 @@
+ALTER TABLE suppliers ADD COLUMN description TEXT;
+ALTER TABLE suppliers ADD COLUMN city VARCHAR(80);
+ALTER TABLE suppliers ADD COLUMN state VARCHAR(2);

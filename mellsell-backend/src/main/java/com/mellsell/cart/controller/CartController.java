@@ -5,9 +5,10 @@ import com.mellsell.auth.exception.ResourceNotFoundException;
 import com.mellsell.auth.service.UserService;
 import com.mellsell.cart.dto.AddCartItemRequest;
 import com.mellsell.cart.dto.CartItemResponseDTO;
+import com.mellsell.cart.dto.UpdateCartItemRequest;
 import com.mellsell.cart.service.CartService;
 import com.mellsell.order.dto.CheckoutRequest;
-import com.mellsell.order.dto.OrderResponseDTO;
+import com.mellsell.order.dto.CheckoutResponseDTO;
 import com.mellsell.order.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +45,12 @@ public class CartController {
     }
 
     @PreAuthorize("isAuthenticated()")
+    @PutMapping("/items/{id}")
+    public CartItemResponseDTO updateItem(@PathVariable Long id, @Valid @RequestBody UpdateCartItemRequest req) {
+        return cartService.updateItemQuantity(currentUser(), id, req.getQuantity());
+    }
+
+    @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/items/{id}")
     public void removeItem(@PathVariable Long id) {
         cartService.removeItem(currentUser(), id);
@@ -51,7 +58,7 @@ public class CartController {
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/checkout")
-    public OrderResponseDTO checkout(@Valid @RequestBody CheckoutRequest req) {
+    public CheckoutResponseDTO checkout(@Valid @RequestBody CheckoutRequest req) {
         return orderService.checkout(currentUser(), req);
     }
 }
