@@ -1,9 +1,8 @@
-import React from 'react'
-void React
+import React from 'react' // eslint-disable-line no-unused-vars
 
 export function HoneycombStamp({ className = '' }) {
   return (
-    <svg viewBox="0 0 64 64" className={className} fill="none" aria-hidden>
+    <svg viewBox="0 0 64 64" className={className} fill="none" aria-hidden={true}>
       <g stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
         <path d="M20 7 32 14v14L20 35 8 28V14L20 7Z" />
         <path d="M44 7 56 14v14L44 35 32 28V14L44 7Z" />
@@ -15,7 +14,7 @@ export function HoneycombStamp({ className = '' }) {
 
 export function WildflowerStamp({ className = '' }) {
   return (
-    <svg viewBox="0 0 64 64" className={className} fill="none" aria-hidden>
+    <svg viewBox="0 0 64 64" className={className} fill="none" aria-hidden={true}>
       <g stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="32" cy="30" r="6" />
         <path d="M32 10v8M32 42v8M12 30h8M44 30h8M18 16l6 6M40 38l6 6M46 16l-6 6M24 38l-6 6" />
@@ -27,7 +26,7 @@ export function WildflowerStamp({ className = '' }) {
 
 export function FieldLinesStamp({ className = '' }) {
   return (
-    <svg viewBox="0 0 64 64" className={className} fill="none" aria-hidden>
+    <svg viewBox="0 0 64 64" className={className} fill="none" aria-hidden={true}>
       <g stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
         <path d="M8 49c12-7 36-7 48 0" />
         <path d="M10 40c11-6 33-6 44 0" />
@@ -41,7 +40,7 @@ export function FieldLinesStamp({ className = '' }) {
 
 export function BeeTrailIcon({ className = '' }) {
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden>
+    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden={true}>
       <path d="M3 9c3-2 4 3 7 1s3-5 7-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeDasharray="3 3" />
       <g stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M14.5 9.5a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z" />

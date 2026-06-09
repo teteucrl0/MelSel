@@ -74,7 +74,7 @@ export default function ProductCard({
 
       <div className="flex flex-1 flex-col p-4 pt-3.5">
         <div className="mb-1.5 flex items-center justify-between">
-          <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold tracking-[0.5px] rounded-full ${outOfStock ? 'bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-300' : 'bg-lime-100 text-lime-800 dark:bg-lime-900/40 dark:text-lime-300'}`}>
+          <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold tracking-[0.5px] rounded-full ${outOfStock ? 'bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-300' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'}`}>
             <span className={`inline-block h-1.5 w-1.5 rounded-full ${outOfStock ? 'bg-red-500' : 'bg-emerald-500'}`} />
             {outOfStock ? 'ESGOTADO' : 'DISPONÍVEL'}
           </span>
@@ -90,7 +90,7 @@ export default function ProductCard({
           </motion.div>
         </div>
 
-        <h3 className="text-[15px] font-semibold leading-tight tracking-[-0.2px] text-stone-900 dark:text-stone-50 line-clamp-2 group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors">
+        <h3 className="text-[15px] font-semibold leading-tight tracking-[-0.2px] text-stone-900 dark:text-stone-50 line-clamp-2 group-hover:text-brand-700 dark:group-hover:text-brand-400 transition-colors">
           <Link to={`/product/${product.id}`}>
             {product.name}
           </Link>
