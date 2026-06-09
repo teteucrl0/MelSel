@@ -1,18 +1,18 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-50: #fffbeb;
-  --color-brand-100: #fef3c7;
-  --color-brand-200: #fde68a;
-  --color-brand-300: #fcd34d;
-  --color-brand-400: #fbbf24;
-  --color-brand-500: #f59e0b;
-  --color-brand-600: #d97706;
-  --color-brand-700: #b45309;
-  --color-brand-800: #92400e;
-  --color-brand-900: #78350f;
+  --color-brand-50: #faf7ef;
+  --color-brand-100: #f3e8d1;
+  --color-brand-200: #e7d3ac;
+  --color-brand-300: #d7b77b;
+  --color-brand-400: #c89858;
+  --color-brand-500: #af7b35;
+  --color-brand-600: #926226;
+  --color-brand-700: #76501f;
+  --color-brand-800: #5a3f1c;
+  --color-brand-900: #432f17;
 
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-sans: "Nunito Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
 
   --shadow-card: 0 1px 2px rgba(0,0,0,0.04), 0 2px 4px rgba(15, 23, 42, 0.05);
   --shadow-card-hover: 0 10px 30px -5px rgba(15, 23, 42, 0.1), 0 4px 6px -1px rgba(15, 23, 42, 0.06);
@@ -20,23 +20,22 @@
 }
 
 /* ============================================
-   LUXURY DARK HONEY THEME - "Mel & Vida" style
-   Deep blacks, warm golds, elegant premium feel
+   RURAL APIARY THEME - terra, madeira e campo
 ============================================ */
 
 :root {
-  --bg: #0a0908;
-  --bg-elevated: #11100f;
-  --bg-card: #161514;
-  --border: #2a2724;
-  --border-gold: #5c4630;
-  --gold: #c5a16e;
-  --gold-light: #e8d5a3;
-  --gold-dark: #8c6640;
-  --text: #f5f2eb;
-  --text-muted: #a69b8c;
-  --accent: #c5a16e;
-  --accent-hover: #e8d5a3;
+  --bg: #f2ecdf;
+  --bg-elevated: #f8f2e4;
+  --bg-card: #fffaf0;
+  --border: #d8c8aa;
+  --border-gold: #b59468;
+  --gold: #b98545;
+  --gold-light: #d9b075;
+  --gold-dark: #875f34;
+  --text: #3f2f21;
+  --text-muted: #715a43;
+  --accent: #a67438;
+  --accent-hover: #b98545;
 }
 
 body {
@@ -73,7 +72,7 @@ body {
 
 .btn-gold {
   background: var(--gold);
-  color: #0a0908;
+  color: #2b1f14;
   font-weight: 600;
   border: none;
   transition: all 0.2s cubic-bezier(0.23, 1, 0.32, 1);
@@ -204,17 +203,17 @@ body {
 
 :root {
   font-family: var(--font-sans);
-  --surface: #ffffff;
-  --surface-muted: #fafaf9;
-  --surface-subtle: #f5f5f4;
-  --border: #e7e5e4;
-  --border-strong: #d6d3d1;
-  --text: #1c1917;
-  --text-muted: #57534e;
-  --accent: #b45309;
-  --accent-hover: #92400e;
-  --accent-soft: #fef3c7;
-  --success: #166534;
+  --surface: #fffbf3;
+  --surface-muted: #f7f0e3;
+  --surface-subtle: #f1e8d7;
+  --border: #dcccc0;
+  --border-strong: #c2ad8d;
+  --text: #3f2f21;
+  --text-muted: #715a43;
+  --accent: #a67438;
+  --accent-hover: #875f34;
+  --accent-soft: #f3ddba;
+  --success: #3f6a35;
   --radius-sm: 0.375rem;
   --radius: 0.625rem;
   --radius-lg: 0.875rem;
@@ -223,17 +222,17 @@ body {
 }
 
 .dark {
-  --surface: #1c1917;
-  --surface-muted: #292524;
-  --surface-subtle: #3f2a1f;
-  --border: #44403c;
-  --border-strong: #57534e;
-  --text: #fafaf9;
-  --text-muted: #a8a29e;
-  --accent: #f59e0b;
-  --accent-hover: #fbbf24;
-  --accent-soft: #3f2a1f;
-  --success: #4ade80;
+  --surface: #252e22;
+  --surface-muted: #2d3729;
+  --surface-subtle: #394633;
+  --border: #55624b;
+  --border-strong: #70805f;
+  --text: #f5ecd8;
+  --text-muted: #c7bb9d;
+  --accent: #d3a05b;
+  --accent-hover: #e1b775;
+  --accent-soft: #544125;
+  --success: #87bb70;
 }
 
 * {

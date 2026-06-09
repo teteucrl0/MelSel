@@ -2938,3 +2938,323 @@ html:not(.dark) .shop-pdp-stock--out {
   background: var(--shop-bg-elevated);
   color: var(--shop-muted);
 }
+
+/* ==========================================================
+   Redesign rural artesanal — fazenda/apiário/família
+   ========================================================== */
+.shop-shell {
+  --font-display: "Alegreya", "Georgia", "Times New Roman", serif;
+  --font-body: "Nunito Sans", "Segoe UI", system-ui, sans-serif;
+
+  --shop-bg: #f4efe2;
+  --shop-bg-elevated: #fbf7ed;
+  --shop-surface: #fffdf7;
+  --shop-surface-hover: #fff7e7;
+  --shop-glass: rgba(250, 244, 232, 0.88);
+  --shop-border: #dccfb7;
+  --shop-border-strong: #bda479;
+  --shop-text: #3e2f1f;
+  --shop-muted: #725842;
+  --shop-muted-dim: #9c846d;
+
+  --shop-accent: #af7b35;
+  --shop-accent-bright: #d69d4b;
+  --shop-accent-dim: #8d6532;
+  --shop-honey: #d69d4b;
+  --shop-accent-glow: rgba(175, 123, 53, 0.3);
+  --shop-accent-soft: rgba(215, 170, 104, 0.18);
+
+  --shop-success: #4f7a3f;
+  --shop-danger: #b14f3c;
+
+  background:
+    radial-gradient(circle at 85% 2%, rgba(137, 170, 118, 0.22), transparent 32%),
+    radial-gradient(circle at 12% 10%, rgba(223, 181, 119, 0.2), transparent 36%),
+    var(--shop-bg);
+}
+
+.shop-shell::before {
+  background:
+    radial-gradient(ellipse 70% 45% at 50% -14%, rgba(182, 143, 80, 0.2), transparent 52%),
+    radial-gradient(ellipse 45% 35% at 100% 48%, rgba(118, 146, 92, 0.17), transparent 48%),
+    radial-gradient(ellipse 55% 40% at 0% 86%, rgba(215, 176, 121, 0.15), transparent 46%);
+}
+
+.shop-shell::after {
+  opacity: 0.05;
+}
+
+html.dark .shop-shell {
+  --shop-bg: #1e241b;
+  --shop-bg-elevated: #293127;
+  --shop-surface: #303a2d;
+  --shop-surface-hover: #374234;
+  --shop-glass: rgba(34, 41, 31, 0.88);
+  --shop-border: #4e5a42;
+  --shop-border-strong: #73805c;
+  --shop-text: #f4ecd7;
+  --shop-muted: #d4c7a8;
+  --shop-muted-dim: #aa9b7f;
+  --shop-accent: #d4a25c;
+  --shop-accent-bright: #e2b774;
+  --shop-accent-dim: #a47a44;
+  --shop-accent-soft: rgba(212, 162, 92, 0.22);
+  --shop-accent-glow: rgba(212, 162, 92, 0.22);
+}
+
+.shop-header {
+  border-bottom: 1px solid var(--shop-border);
+  background: var(--shop-glass);
+  backdrop-filter: blur(10px) saturate(1.12);
+  -webkit-backdrop-filter: blur(10px) saturate(1.12);
+}
+
+.shop-logo {
+  letter-spacing: -0.01em;
+}
+
+.shop-logo-text {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.05rem;
+  line-height: 1;
+}
+
+.shop-logo-text small {
+  font-family: var(--font-body);
+  font-size: 0.54rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--shop-muted);
+}
+
+.shop-logo-mark {
+  border-radius: 14px;
+  background: linear-gradient(160deg, #ebc17b, #b88345);
+  border: 1px solid rgba(141, 101, 50, 0.45);
+  box-shadow: 0 8px 16px rgba(95, 68, 37, 0.2);
+}
+
+.shop-btn-cart {
+  position: relative;
+  color: #2c2015;
+  background: linear-gradient(140deg, #e3b873, #c68d45);
+  border: 1px solid rgba(114, 88, 66, 0.28);
+  box-shadow: 0 7px 18px rgba(141, 101, 50, 0.22);
+}
+
+.shop-btn-cart-icon {
+  width: 1rem;
+  height: 1rem;
+  opacity: 0.82;
+}
+
+.shop-hero {
+  margin-top: 0.35rem;
+  padding: 2.6rem 1.25rem;
+  max-width: 54rem;
+  border: 1px solid var(--shop-border);
+  border-radius: 2rem;
+  background:
+    linear-gradient(180deg, rgba(255, 250, 240, 0.78), rgba(250, 243, 227, 0.74)),
+    repeating-linear-gradient(
+      -25deg,
+      rgba(191, 158, 114, 0.08),
+      rgba(191, 158, 114, 0.08) 10px,
+      transparent 10px,
+      transparent 22px
+    );
+  box-shadow: 0 16px 40px rgba(87, 61, 36, 0.12);
+}
+
+html.dark .shop-hero {
+  background:
+    linear-gradient(180deg, rgba(42, 49, 39, 0.84), rgba(35, 42, 33, 0.82)),
+    repeating-linear-gradient(
+      -25deg,
+      rgba(135, 116, 83, 0.2),
+      rgba(135, 116, 83, 0.2) 10px,
+      transparent 10px,
+      transparent 22px
+    );
+}
+
+.shop-hero-badge {
+  color: #744f2a;
+  border-color: rgba(157, 116, 66, 0.35);
+  background: rgba(244, 223, 182, 0.6);
+  box-shadow: none;
+}
+
+.shop-hero-badge-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.shop-hero h1 em {
+  background: linear-gradient(130deg, #8f6434, #c78c43);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.shop-hero-lead {
+  max-width: 36rem;
+  color: var(--shop-muted);
+}
+
+.shop-hero-motifs {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.shop-hero-motif {
+  width: 2.15rem;
+  height: 2.15rem;
+  color: #8f704d;
+  opacity: 0.84;
+  animation: shop-motif-sway 4.8s ease-in-out infinite;
+}
+
+.shop-hero-motif:nth-child(2) {
+  animation-delay: 0.9s;
+}
+
+.shop-hero-motif:nth-child(3) {
+  animation-delay: 1.8s;
+}
+
+.shop-trust-row {
+  gap: 0.9rem;
+}
+
+.shop-trust-row span {
+  gap: 0.5rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  border: 1px dashed rgba(141, 101, 50, 0.35);
+  background: rgba(255, 250, 240, 0.62);
+}
+
+.shop-trust-icon {
+  width: 1rem;
+  height: 1rem;
+  color: #8d6532;
+  flex-shrink: 0;
+}
+
+.shop-chip.is-active,
+.shop-btn-primary,
+.shop-card:hover .shop-card-cta:not(:disabled),
+.shop-card-cta:focus-visible:not(:disabled) {
+  color: #2a1f15;
+}
+
+.shop-card {
+  border-radius: 1.15rem;
+  border-color: rgba(157, 133, 104, 0.42);
+  background: linear-gradient(180deg, rgba(255, 253, 246, 0.94), rgba(250, 243, 230, 0.92));
+  box-shadow: 0 7px 16px rgba(93, 67, 42, 0.08);
+}
+
+.shop-card:hover {
+  border-color: rgba(156, 112, 58, 0.55);
+  box-shadow: 0 16px 28px rgba(93, 67, 42, 0.16);
+}
+
+.shop-card-producer {
+  color: #816143;
+}
+
+.shop-card-price {
+  color: #8d6532;
+}
+
+.shop-card-cta {
+  border-color: rgba(157, 133, 104, 0.42);
+  background: rgba(255, 246, 228, 0.74);
+}
+
+.shop-producer-stories {
+  margin-top: 2.5rem;
+}
+
+.shop-producer-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+@media (min-width: 720px) {
+  .shop-producer-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.shop-producer-card {
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 1px solid var(--shop-border);
+  background:
+    linear-gradient(180deg, rgba(255, 250, 240, 0.88), rgba(247, 238, 222, 0.86));
+  box-shadow: 0 6px 15px rgba(93, 67, 42, 0.08);
+}
+
+html.dark .shop-producer-card {
+  background: linear-gradient(180deg, rgba(52, 61, 48, 0.88), rgba(45, 54, 41, 0.86));
+}
+
+.shop-producer-card-icon {
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8d6532;
+  background: rgba(238, 216, 174, 0.62);
+  border: 1px dashed rgba(141, 101, 50, 0.35);
+  margin-bottom: 0.65rem;
+}
+
+.shop-producer-icon-svg {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+.shop-producer-card-region {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--shop-muted-dim);
+}
+
+.shop-producer-card h3 {
+  margin: 0.35rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  line-height: 1.1;
+}
+
+.shop-producer-card-specialty {
+  margin: 0.35rem 0 0;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #8d6532;
+}
+
+.shop-producer-card-story {
+  margin: 0.55rem 0 0;
+  font-size: 0.87rem;
+  line-height: 1.5;
+  color: var(--shop-muted);
+}
+
+@keyframes shop-motif-sway {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}

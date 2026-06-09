@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import ProductImage from './ProductImage'
 import ProductSupplierLabel from './ProductSupplierLabel'
-import { AnimatedButton, variants } from './motion/Motion'
+import { AnimatedButton } from './motion/Motion'
 import FlaticonIcon from './FlaticonIcon'
 
 const money = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -60,7 +60,6 @@ export default function ProductCard({
       transition={{ type: 'spring', stiffness: 420, damping: 30 }}
       className={`surface surface-interactive group flex h-full flex-col overflow-hidden ${flash ? 'stock-flash' : ''}`}
     >
-      {/* Image with premium treatment */}
       <Link to={`/product/${product.id}`} className="block overflow-hidden relative">
         <motion.div 
           whileHover={{ scale: 1.035 }} 
@@ -70,14 +69,12 @@ export default function ProductCard({
           <ProductImage imageUrl={product.imageUrl} alt={product.name} />
         </motion.div>
         
-        {/* Subtle gradient overlay on image for text readability if needed */}
         <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
       </Link>
 
       <div className="flex flex-1 flex-col p-4 pt-3.5">
-        {/* Status row — elegant */}
         <div className="mb-1.5 flex items-center justify-between">
-          <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold tracking-[0.5px] rounded-full ${outOfStock ? 'bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-400' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400'}`}>
+          <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold tracking-[0.5px] rounded-full ${outOfStock ? 'bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-300' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'}`}>
             <span className={`inline-block h-1.5 w-1.5 rounded-full ${outOfStock ? 'bg-red-500' : 'bg-emerald-500'}`} />
             {outOfStock ? 'ESGOTADO' : 'DISPONÍVEL'}
           </span>
@@ -88,12 +85,11 @@ export default function ProductCard({
             animate={{ scale: 1, opacity: 1 }}
             className="flex items-baseline gap-1 text-[10px] font-medium tabular-nums text-muted"
           >
-            <span className="font-semibold text-base leading-none text-stone-800 dark:text-stone-100">{stock}</span>
+            <span className="font-semibold text-base leading-none text-stone-800 dark:text-stone-200">{stock}</span>
             <span className="text-[10px]">un.</span>
           </motion.div>
         </div>
 
-        {/* Title */}
         <h3 className="text-[15px] font-semibold leading-tight tracking-[-0.2px] text-stone-900 dark:text-stone-50 line-clamp-2 group-hover:text-brand-700 dark:group-hover:text-brand-400 transition-colors">
           <Link to={`/product/${product.id}`}>
             {product.name}
@@ -102,12 +98,10 @@ export default function ProductCard({
 
         <ProductSupplierLabel name={product.supplierName} />
 
-        {/* Description */}
         <p className="mt-1.5 mb-2 line-clamp-2 flex-1 text-[13px] leading-snug text-muted">
           {product.description || 'Mel artesanal puro, colhido com cuidado por famílias apicultoras.'}
         </p>
 
-        {/* Footer: Price + Actions (more elegant) */}
         <div className="mt-auto flex items-end justify-between pt-3 border-t border-stone-100 dark:border-stone-800">
           <div>
             <div className="text-[10px] font-medium text-muted tracking-widest">PREÇO</div>
