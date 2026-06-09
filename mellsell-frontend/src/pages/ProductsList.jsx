@@ -8,6 +8,13 @@ import { notifyCartUpdated } from '../utils/cartEvents'
 import useStockSync from '../hooks/useStockSync'
 import useMySupplierId from '../hooks/useMySupplierId'
 import CustomerProductCard from '../components/shop/CustomerProductCard'
+import ProducerStoryCard from '../components/shop/ProducerStoryCard'
+import {
+  HoneycombStamp,
+  WildflowerStamp,
+  FieldLinesStamp,
+  BeeTrailIcon,
+} from '../components/shop/ThematicIllustrations'
 import FlaticonIcon from '../components/FlaticonIcon'
 
 const PAGE_SIZE = 24
@@ -28,6 +35,27 @@ const FILTER_RULES = {
   Própolis: (p) => /pr[oó]polis|extrato/i.test(p.name || ''),
   Pólen: (p) => /p[oó]len|gr[aã]o/i.test(p.name || ''),
 }
+
+const PRODUCER_STORIES = [
+  {
+    name: 'Família Nogueira',
+    region: 'Serra da Mantiqueira • MG',
+    specialty: 'Mel silvestre de flor de campo',
+    story: 'Três gerações cuidando das colmeias ao redor do pomar, com colheita manual e descanso natural dos favos.',
+  },
+  {
+    name: 'Sítio Boa Aurora',
+    region: 'Vale do Ribeira • SP',
+    specialty: 'Própolis verde sazonal',
+    story: 'Apiário familiar em área de mata nativa. A produção respeita o ciclo das abelhas e a saúde da flora local.',
+  },
+  {
+    name: 'Apiário Santa Luzia',
+    region: 'Chapada Diamantina • BA',
+    specialty: 'Mel multifloral artesanal',
+    story: 'Colheitas pequenas com rastreio por lote, contando a história de cada safra direto do campo para a sua mesa.',
+  },
+]
 
 export default function ProductsList() {
   const navigate = useNavigate()
@@ -156,17 +184,25 @@ export default function ProductsList() {
       )}
 
       <section className="shop-hero">
-        <span className="shop-hero-badge">✦ Marketplace premium</span>
+        <span className="shop-hero-badge">
+          <BeeTrailIcon className="shop-hero-badge-icon" />
+          Fazenda • Apiário • Família
+        </span>
         <h1>
-          O mel mais puro,<br /><em>direto da origem</em>
+          Mel de verdade,<br /><em>feito por mãos de família</em>
         </h1>
         <p className="shop-hero-lead">
-          Curadoria de apicultores artesanais. Use a busca no topo para encontrar mel ou produtor (ex.: &quot;Matheus&quot;).
+          Uma seleção acolhedora de pequenos apiários brasileiros, com sabor de campo, simplicidade e cuidado em cada colheita.
         </p>
+        <div className="shop-hero-motifs" aria-hidden>
+          <HoneycombStamp className="shop-hero-motif" />
+          <WildflowerStamp className="shop-hero-motif" />
+          <FieldLinesStamp className="shop-hero-motif" />
+        </div>
         <div className="shop-trust-row">
-          <span>✓ Produtores verificados</span>
-          <span>✓ Estoque em tempo real</span>
-          <span>✓ Entrega rastreada</span>
+          <span><HoneycombStamp className="shop-trust-icon" />Lotes de origem rastreada</span>
+          <span><WildflowerStamp className="shop-trust-icon" />Produtores familiares verificados</span>
+          <span><FieldLinesStamp className="shop-trust-icon" />Entrega com cuidado do campo à cidade</span>
         </div>
       </section>
 
@@ -341,6 +377,30 @@ export default function ProductsList() {
             <strong>Receba em casa</strong>
             <p>Finalize com seu CEP e acompanhe a entrega.</p>
           </div>
+        </div>
+      </section>
+
+      <section className="shop-producer-stories" aria-labelledby="historias-dos-produtores">
+        <div className="shop-section-head">
+          <div>
+            <h2 id="historias-dos-produtores">Quem produz o seu mel</h2>
+            <p>Faces reais, histórias simples e produção artesanal.</p>
+          </div>
+        </div>
+        <div className="shop-producer-grid">
+          {PRODUCER_STORIES.map((producer, idx) => (
+            <ProducerStoryCard
+              key={producer.name}
+              {...producer}
+              icon={
+                idx === 0
+                  ? <HoneycombStamp className="shop-producer-icon-svg" />
+                  : idx === 1
+                    ? <WildflowerStamp className="shop-producer-icon-svg" />
+                    : <FieldLinesStamp className="shop-producer-icon-svg" />
+              }
+            />
+          ))}
         </div>
       </section>
     </>
