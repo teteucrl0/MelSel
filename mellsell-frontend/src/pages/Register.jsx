@@ -1,13 +1,15 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import authService from '../services/authService'
 import ApiarySetupLive from '../components/ApiarySetupLive'
 import BirthDateInput from '../components/BirthDateInput'
 import AccountTypePicker from '../components/AccountTypePicker'
 import VendorRegisterPanel from '../components/VendorRegisterPanel'
-import { motion } from 'framer-motion'
 import { MotionPage } from '../components/motion/Motion'
 import Logo from '../components/Logo'
+import FormInput from '../components/FormInput'
+import PasswordStrengthInput from '../components/PasswordStrengthInput'
+import Button from '../components/Button'
 import { brDateToIso, getBirthDateValidationError, isValidBrBirthDate } from '../utils/birthDateBr'
 import { getFullNameError, isValidFullName, normalizeFullName } from '../utils/fullName'
 import {
@@ -17,7 +19,7 @@ import {
   getVendorStoreNameError,
   stripMarkupChars,
 } from '../utils/inputSanitizer'
-import { resolvePostLoginPath } from '../services/authUtil'
+import { getPasswordRequirements, validateEmail } from '../utils/validators'
 
 const FIELD_LABELS = {
   name: 'Nome',
@@ -63,12 +65,11 @@ function initialRoleFromSearch(searchParams) {
 }
 
 export default function Register() {
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [birthDate, setBirthDate] = useState('')
   const [password, setPassword] = useState('')
-  const [role, setRole] = useState(() => initialRoleFromSearch(searchParams))
   const [storeName, setStoreName] = useState('')
   const [storeError, setStoreError] = useState('')
   const [supplierDescription, setSupplierDescription] = useState('')
@@ -80,30 +81,10 @@ export default function Register() {
   const [error, setError] = useState('')
   const [nameError, setNameError] = useState('')
   const [birthDateError, setBirthDateError] = useState('')
-  const [passwordStrength, setPasswordStrength] = useState(0)
   const [submitting, setSubmitting] = useState(false)
   const [apiaryLive, setApiaryLive] = useState(false)
   const navigate = useNavigate()
-
-  useEffect(() => {
-    setRole(initialRoleFromSearch(searchParams))
-  }, [searchParams])
-
-  const getPasswordRequirements = (pwd) => ({
-    length: pwd.length >= 8,
-    lower: /[a-z]/.test(pwd),
-    upper: /[A-Z]/.test(pwd),
-    digit: /\d/.test(pwd),
-    special: /[^A-Za-z0-9]/.test(pwd),
-  })
-
-  const checkPasswordStrength = (pwd) => {
-    if (!pwd) {
-      setPasswordStrength(0)
-      return
-    }
-    setPasswordStrength(Object.values(getPasswordRequirements(pwd)).filter(Boolean).length)
-  }
+  const role = initialRoleFromSearch(searchParams)
 
   const isPasswordValid = (pwd) => Object.values(getPasswordRequirements(pwd)).every(Boolean)
 
@@ -125,6 +106,11 @@ export default function Register() {
     setStateError('')
     if (!name || !email || !birthDate || !password) {
       setError('Todos os campos são obrigatórios.')
+      return false
+    }
+    const emailErr = validateEmail(email)
+    if (emailErr) {
+      setError(emailErr)
       return false
     }
     const nameErr = getFullNameError(name)
@@ -232,7 +218,18 @@ export default function Register() {
     }
   }
 
-  const reqs = getPasswordRequirements(password)
+  const handleRoleChange = (next) => {
+    const nextParams = new URLSearchParams(searchParams)
+    if (next === 'VENDEDOR') nextParams.set('tipo', 'apicultor')
+    else nextParams.delete('tipo')
+    setSearchParams(nextParams, { replace: true })
+    setError('')
+    setStoreError('')
+    setDescriptionError('')
+    setCityError('')
+    setStateError('')
+  }
+
   const isVendor = role === 'VENDEDOR'
 
   return (
@@ -260,14 +257,7 @@ export default function Register() {
             <AccountTypePicker
               value={role}
               disabled={submitting || apiaryLive}
-              onChange={(next) => {
-                setRole(next)
-                setError('')
-                setStoreError('')
-                setDescriptionError('')
-                setCityError('')
-                setStateError('')
-              }}
+              onChange={handleRoleChange}
             />
           </div>
 
@@ -305,41 +295,33 @@ export default function Register() {
             />
           )}
 
-          <div>
-            <label className="label" htmlFor="register-name">
-              Nome completo
-            </label>
-            <input
-              id="register-name"
-              className={`input-field ${nameError ? 'shop-input-invalid' : ''}`}
-              value={name}
-              placeholder="Ex.: Maria Silva Santos"
-              onChange={(e) => {
-                const v = stripMarkupChars(e.target.value)
-                setName(v)
-                if (nameError) setNameError(getFullNameError(v) || '')
-              }}
-              onBlur={() => setNameError(getFullNameError(name) || '')}
-              maxLength={120}
-              required
-              aria-invalid={Boolean(nameError)}
-            />
-            {nameError ? (
-              <p className="shop-field-error">{nameError}</p>
-            ) : (
-              <p className="shop-field-hint">Nome e sobrenome, separados por espaço.</p>
-            )}
-          </div>
-          <div>
-            <label className="label">E-mail</label>
-            <input
-              className="input-field"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
+          <FormInput
+            id="register-name"
+            label="Nome completo"
+            value={name}
+            placeholder="Ex.: Maria Silva Santos"
+            onChange={(e) => {
+              const v = stripMarkupChars(e.target.value)
+              setName(v)
+              if (nameError) setNameError(getFullNameError(v) || '')
+            }}
+            onBlur={() => setNameError(getFullNameError(name) || '')}
+            maxLength={120}
+            required
+            error={nameError}
+            hint="Nome e sobrenome, separados por espaço."
+            success={Boolean(name && !nameError)}
+            autoComplete="name"
+          />
+          <FormInput
+            id="register-email"
+            type="email"
+            label="E-mail"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            autoComplete="email"
+          />
           <BirthDateInput
             value={birthDate}
             onChange={(v) => {
@@ -348,43 +330,18 @@ export default function Register() {
             }}
             error={birthDateError}
           />
-          <div>
-            <label className="label">Senha</label>
-            <input
-              className="input-field"
-              type="password"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value)
-                checkPasswordStrength(e.target.value)
-              }}
-              required
-            />
-            {password && (
-              <div className="mt-3 space-y-1.5 rounded-lg border border-stone-200 bg-stone-50 p-3 text-xs dark:border-stone-700 dark:bg-stone-800/50">
-                <p className="font-medium text-muted">Força: {passwordStrength}/5</p>
-                {[
-                  ['length', 'Mínimo 8 caracteres'],
-                  ['lower', 'Letra minúscula'],
-                  ['upper', 'Letra maiúscula'],
-                  ['digit', 'Número'],
-                  ['special', 'Caractere especial (ex.: ! @ # _)'],
-                ].map(([key, label]) => (
-                  <p key={key} className={reqs[key] ? 'text-emerald-700 dark:text-emerald-400' : 'text-muted'}>
-                    {reqs[key] ? '✓' : '·'} {label}
-                  </p>
-                ))}
-              </div>
-            )}
-          </div>
+          <PasswordStrengthInput
+            id="register-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="new-password"
+          />
           <ApiarySetupLive active={apiaryLive} />
 
-          <motion.button
-            whileHover={{ scale: 1.005 }}
-            whileTap={{ scale: 0.985 }}
+          <Button
             type="submit"
-            disabled={submitting || apiaryLive}
             className="btn-primary w-full py-2.5"
+            disabled={submitting || apiaryLive}
           >
             {submitting
               ? 'Criando conta…'
@@ -393,7 +350,7 @@ export default function Register() {
                 : isVendor
                   ? 'Criar loja de apicultor'
                   : 'Criar conta de comprador'}
-          </motion.button>
+          </Button>
         </form>
 
         <p className="mt-6 text-center text-sm text-muted">

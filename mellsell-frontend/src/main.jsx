@@ -1,6 +1,8 @@
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import './styles/shop.css'
+import './styles/components/FormInput.css'
+import './styles/components/Button.css'
 import App from './app/App.jsx'
 import { ThemeProvider } from './contexts/ThemeContext.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'

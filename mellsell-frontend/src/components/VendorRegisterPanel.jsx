@@ -1,4 +1,5 @@
 import FlaticonIcon from './FlaticonIcon'
+import FormInput from './FormInput'
 
 /** Campos e benefícios do cadastro como fornecedor. */
 export default function VendorRegisterPanel({
@@ -30,25 +31,18 @@ export default function VendorRegisterPanel({
       </ul>
       <div className="shop-vendor-register-fields">
         <div>
-          <label className="label" htmlFor="register-store">
-            Nome da loja ou apiário <span className="shop-required">*</span>
-          </label>
-          <input
+          <FormInput
             id="register-store"
-            className={`input-field ${storeError ? 'shop-input-invalid' : ''}`}
+            label="Nome da loja ou apiário"
             placeholder="Ex.: Apiário Silva, Mel da Serra"
             value={storeName}
             onChange={(e) => onStoreNameChange(e.target.value)}
             disabled={disabled}
             maxLength={120}
             required
-            aria-invalid={Boolean(storeError)}
+            error={storeError}
+            hint="É assim que os clientes vão encontrar você na loja."
           />
-          {storeError ? (
-            <p className="shop-field-error">{storeError}</p>
-          ) : (
-            <p className="shop-field-hint">É assim que os clientes vão encontrar você na loja.</p>
-          )}
         </div>
 
         <div>
@@ -76,29 +70,22 @@ export default function VendorRegisterPanel({
 
         <div className="shop-vendor-location-grid">
           <div>
-            <label className="label" htmlFor="register-vendor-city">
-              Cidade <span className="shop-required">*</span>
-            </label>
-            <input
+            <FormInput
               id="register-vendor-city"
-              className={`input-field ${cityError ? 'shop-input-invalid' : ''}`}
+              label="Cidade"
               placeholder="Ex.: Ouro Preto"
               value={city}
               onChange={(e) => onCityChange(e.target.value)}
               disabled={disabled}
               maxLength={80}
               required
-              aria-invalid={Boolean(cityError)}
+              error={cityError}
             />
-            {cityError ? <p className="shop-field-error">{cityError}</p> : null}
           </div>
           <div>
-            <label className="label" htmlFor="register-vendor-state">
-              UF <span className="shop-required">*</span>
-            </label>
-            <input
+            <FormInput
               id="register-vendor-state"
-              className={`input-field ${stateError ? 'shop-input-invalid' : ''}`}
+              label="UF"
               placeholder="MG"
               value={state}
               onChange={(e) => onStateChange(e.target.value)}
@@ -106,13 +93,9 @@ export default function VendorRegisterPanel({
               maxLength={2}
               required
               autoComplete="address-level1"
-              aria-invalid={Boolean(stateError)}
+              error={stateError}
+              hint="2 letras"
             />
-            {stateError ? (
-              <p className="shop-field-error">{stateError}</p>
-            ) : (
-              <p className="shop-field-hint">2 letras</p>
-            )}
           </div>
         </div>
       </div>

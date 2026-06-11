@@ -20,6 +20,10 @@ import {
 import VendorRegisterPanel from '../components/VendorRegisterPanel'
 import { hasRole } from '../services/authUtil'
 import PageLoadPlaceholder from '../components/PageLoadPlaceholder'
+import FormInput from '../components/FormInput'
+import PasswordStrengthInput from '../components/PasswordStrengthInput'
+import Button from '../components/Button'
+import { validatePasswordSecurity } from '../utils/validators'
 
 const ROLE_LABELS = {
   CLIENTE: 'Cliente',
@@ -198,6 +202,11 @@ export default function Profile() {
       setNotice({ type: 'error', text: 'Preencha a senha atual e a nova senha.' })
       return
     }
+    const passwordError = validatePasswordSecurity(newPassword)
+    if (passwordError) {
+      setNotice({ type: 'error', text: passwordError })
+      return
+    }
     setChangingPassword(true)
     try {
       await userService.changePassword(currentPassword, newPassword)
@@ -227,9 +236,9 @@ export default function Profile() {
           <p className="mt-3 text-xs text-muted">
             Confira se o backend foi reiniciado após a atualização (./run-presentation.sh).
           </p>
-          <button type="button" className="btn-primary mt-6" onClick={() => window.location.reload()}>
+          <Button type="button" variant="primary" className="mt-6" onClick={() => window.location.reload()}>
             Recarregar
-          </button>
+          </Button>
         </div>
       </MotionPage>
     )
@@ -320,41 +329,41 @@ export default function Profile() {
             stateError={vendorStateError}
             disabled={becomingVendor}
           />
-          <button type="submit" className="btn-primary" disabled={becomingVendor}>
+          <Button type="submit" variant="primary" disabled={becomingVendor}>
             {becomingVendor ? 'Enviando...' : 'Quero vender no MelSell'}
-          </button>
+          </Button>
         </form>
       )}
 
       <form onSubmit={saveProfile} className="surface space-y-4 p-6">
         <h2 className="section-title">Dados pessoais</h2>
 
-        <div>
-          <label className="label">E-mail</label>
-          <input className="input-field bg-stone-50 dark:bg-stone-800/80" value={profile.email} readOnly disabled />
-          <p className="mt-1 text-xs text-muted">O e-mail de login não pode ser alterado aqui.</p>
-        </div>
+        <FormInput
+          id="profile-email"
+          label="E-mail"
+          value={profile.email}
+          readOnly
+          disabled
+          hint="O e-mail de login não pode ser alterado aqui."
+          inputClassName="bg-stone-50 dark:bg-stone-800/80"
+        />
 
-        <div>
-          <label className="label" htmlFor="profile-name">
-            Nome completo
-          </label>
-          <input
-            id="profile-name"
-            className={`input-field ${nameError ? '!border-red-500 focus:!border-red-500 dark:!border-red-400' : ''}`}
-            value={name}
-            onChange={(e) => {
-              const v = stripMarkupChars(e.target.value)
-              setName(v)
-              if (nameError) setNameError(getFullNameError(v) || '')
-            }}
-            onBlur={() => setNameError(getFullNameError(name) || '')}
-            required
-            maxLength={120}
-            aria-invalid={Boolean(nameError)}
-          />
-          {nameError && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{nameError}</p>}
-        </div>
+        <FormInput
+          id="profile-name"
+          label="Nome completo"
+          value={name}
+          onChange={(e) => {
+            const v = stripMarkupChars(e.target.value)
+            setName(v)
+            if (nameError) setNameError(getFullNameError(v) || '')
+          }}
+          onBlur={() => setNameError(getFullNameError(name) || '')}
+          required
+          maxLength={120}
+          error={nameError}
+          success={Boolean(name && !nameError)}
+          autoComplete="name"
+        />
 
         <BirthDateInput
           id="profile-birth"
@@ -364,19 +373,14 @@ export default function Profile() {
         />
 
         {isVendor && (
-          <div>
-            <label className="label" htmlFor="profile-store">
-              Nome da loja / apiário
-            </label>
-            <input
-              id="profile-store"
-              className="input-field"
-              value={storeName}
-              onChange={(e) => setStoreName(stripMarkupChars(e.target.value))}
-              placeholder="Como aparece para os clientes"
-              maxLength={120}
-            />
-          </div>
+          <FormInput
+            id="profile-store"
+            label="Nome da loja / apiário"
+            value={storeName}
+            onChange={(e) => setStoreName(stripMarkupChars(e.target.value))}
+            placeholder="Como aparece para os clientes"
+            maxLength={120}
+          />
         )}
 
         <div>
@@ -384,45 +388,33 @@ export default function Profile() {
           <p className="mt-1 text-sm text-stone-800 dark:text-stone-200">{rolesText || '—'}</p>
         </div>
 
-        <button type="submit" className="btn-primary" disabled={saving}>
+        <Button type="submit" variant="primary" disabled={saving}>
           {saving ? 'Salvando...' : 'Salvar alterações'}
-        </button>
+        </Button>
       </form>
 
       <form onSubmit={savePassword} className="surface space-y-4 p-6">
         <h2 className="section-title">Alterar senha</h2>
-        <div>
-          <label className="label" htmlFor="current-password">
-            Senha atual
-          </label>
-          <input
-            id="current-password"
-            type="password"
-            className="input-field"
-            autoComplete="current-password"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-          />
-        </div>
-        <div>
-          <label className="label" htmlFor="new-password">
-            Nova senha
-          </label>
-          <input
-            id="new-password"
-            type="password"
-            className="input-field"
-            autoComplete="new-password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-          />
-          <p className="mt-1 text-xs text-muted">
-            Mínimo 8 caracteres, com maiúscula, minúscula, número e símbolo.
-          </p>
-        </div>
-        <button type="submit" className="btn-secondary" disabled={changingPassword}>
+        <FormInput
+          id="current-password"
+          type="password"
+          label="Senha atual"
+          autoComplete="current-password"
+          value={currentPassword}
+          onChange={(e) => setCurrentPassword(e.target.value)}
+          required
+        />
+        <PasswordStrengthInput
+          id="new-password"
+          label="Nova senha"
+          autoComplete="new-password"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          required
+        />
+        <Button type="submit" variant="secondary" disabled={changingPassword}>
           {changingPassword ? 'Alterando...' : 'Atualizar senha'}
-        </button>
+        </Button>
       </form>
     </MotionPage>
   )

@@ -1,0 +1,23 @@
+.app-button {
+  min-height: 2.6rem;
+}
+
+.btn-danger {
+  color: #ffffff;
+  background: var(--danger, #b91c1c);
+  border: 1px solid var(--danger, #b91c1c);
+  border-radius: var(--radius);
+  padding: 0.6rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.btn-danger:hover:not(:disabled) {
+  filter: brightness(0.92);
+}
+
+.btn-danger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

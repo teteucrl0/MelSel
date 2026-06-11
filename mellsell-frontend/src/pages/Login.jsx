@@ -1,30 +1,37 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import authService from '../services/authService'
 import { hasValidLocalSession } from '../utils/authSession'
 import { formatApiError } from '../utils/apiValidationError'
 import { resolvePostLoginPath } from '../services/authUtil'
-import { MotionPage, StaggerContainer, StaggerItem, AnimatedButton, variants } from '../components/motion/Motion'
+import { MotionPage, StaggerContainer, StaggerItem, AnimatedButton } from '../components/motion/Motion'
 import Logo from '../components/Logo'
+import FormInput from '../components/FormInput'
+import useFormValidation from '../hooks/useFormValidation'
+import { validateEmail, validateRequired } from '../utils/validators'
+
+function resolveDisplayError(error, sessionExpired, registerMessage) {
+  if (registerMessage && !sessionExpired) return error
+  if (error) return error
+  if (sessionExpired) return 'Sessão expirada. Entre novamente com seu e-mail e senha.'
+  return ''
+}
 
 export default function Login() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const navigate = useNavigate()
   const location = useLocation()
   const from = location.state?.from?.pathname || '/'
   const sessionExpired = Boolean(location.state?.sessionExpired)
   const registerMessage = location.state?.message
-
-  useEffect(() => {
-    if (sessionExpired) {
-      setError('Sessão expirada. Entre novamente com seu e-mail e senha.')
-    } else if (registerMessage) {
-      setError('')
-    }
-  }, [sessionExpired, registerMessage])
+  const form = useFormValidation({
+    initialValues: { email: '', password: '' },
+    validators: {
+      email: validateEmail,
+      password: (value) => validateRequired(value, 'Senha é obrigatória.'),
+    },
+  })
 
   useEffect(() => {
     if (!hasValidLocalSession()) return
@@ -33,8 +40,10 @@ export default function Login() {
 
   const submit = async (e) => {
     e.preventDefault()
+    setError('')
+    if (!form.validateForm()) return
     try {
-      const session = await authService.login(email, password)
+      const session = await authService.login(form.values.email, form.values.password)
       navigate(resolvePostLoginPath(session, from), { replace: true })
     } catch (err) {
       const status = err?.response?.status
@@ -45,6 +54,7 @@ export default function Login() {
       }
     }
   }
+  const displayError = resolveDisplayError(error, sessionExpired, registerMessage)
 
   return (
     <MotionPage className="mx-auto max-w-md">
@@ -67,36 +77,36 @@ export default function Login() {
             {registerMessage}
           </div>
         )}
-        {error && <div className="alert alert-error mt-6">{error}</div>}
+        {displayError && <div className="alert alert-error mt-6">{displayError}</div>}
 
-        <form onSubmit={submit}>
+        <form onSubmit={submit} noValidate>
           <StaggerContainer className="mt-6 space-y-4">
             <StaggerItem>
-              <div>
-                <label className="label" htmlFor="email">E-mail</label>
-                <input
-                  id="email"
-                  className="input-field"
-                  type="email"
-                  placeholder="voce@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
+              <FormInput
+                id="email"
+                type="email"
+                label="E-mail"
+                placeholder="voce@email.com"
+                value={form.values.email}
+                onChange={form.handleChange('email')}
+                onBlur={form.handleBlur('email')}
+                error={form.touched.email ? form.errors.email : ''}
+                required
+                autoComplete="email"
+              />
             </StaggerItem>
             <StaggerItem>
-              <div>
-                <label className="label" htmlFor="password">Senha</label>
-                <input
-                  id="password"
-                  className="input-field"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
+              <FormInput
+                id="password"
+                type="password"
+                label="Senha"
+                value={form.values.password}
+                onChange={form.handleChange('password')}
+                onBlur={form.handleBlur('password')}
+                error={form.touched.password ? form.errors.password : ''}
+                required
+                autoComplete="current-password"
+              />
             </StaggerItem>
             <StaggerItem>
               <AnimatedButton
